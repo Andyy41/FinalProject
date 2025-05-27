@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 public class GraphicsPanel extends JPanel implements ActionListener, KeyListener, MouseListener {
@@ -30,13 +31,22 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         requestFocusInWindow(); // see comment above
     }
 
+    // Check if the player is moving (by checking movement keys)
+    private boolean isMoving() {
+        boolean x = pressedKeys[KeyEvent.VK_A] ||
+                pressedKeys[KeyEvent.VK_D] ||
+                pressedKeys[KeyEvent.VK_W] ||
+                pressedKeys[KeyEvent.VK_S];
+        System.out.println(x);
+        return x;
+    }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        g.drawImage(player.getPlayerImage(), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
 
 
         // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
@@ -118,6 +128,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
     }
 
+  //  public ArrayList<Integer> Keys(){
+  //      while (isMoving())
+  //  }
 
     // ActionListener interface method
     @Override

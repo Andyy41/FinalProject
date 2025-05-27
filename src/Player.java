@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class Player implements KeyListener {
+public class Player  {
     private final int MOVE_AMT = 3;
     private BufferedImage right;
     private BufferedImage left;
@@ -21,7 +21,6 @@ public class Player implements KeyListener {
     private Animation idleAnimation;
     private long rollCd;
     private long last;
-    private boolean[] pressedKeys;
 
     public Player() {
         facingRight = true;
@@ -30,9 +29,6 @@ public class Player implements KeyListener {
         yCoord = 435; // On the ground
         rollCd = 2000;
         last = 0;
-
-        // Initialize the key tracking array
-        pressedKeys = new boolean[256];
 
         // Load Idle Animation
         ArrayList<BufferedImage> idleImages = new ArrayList<>();
@@ -57,7 +53,18 @@ public class Player implements KeyListener {
             }
         }
         animation = new Animation(walkImages, 100);
+
+    ArrayList<BufferedImage> IdleUR = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+        String filename = "src\\IdleUR" + i + ".png";
+        try {
+            IdleUR.add(ImageIO.read(new File(filename)));
+        } catch (IOException e) {
+            System.out.println("Error loading walk image: " + filename);
+        }
     }
+    animation = new Animation(walkImages, 100);
+}
 
     public void cooldown() {
         long time = System.currentTimeMillis();
@@ -152,9 +159,9 @@ public class Player implements KeyListener {
         }
     }
 
-    public BufferedImage getPlayerImage() {
+    public BufferedImage getPlayerImage(boolean isMoving) {
         // If moving, use the walking animation; if idle, use the idle animation
-        if (isMoving()) {
+        if (isMoving) {
             return animation.getActiveFrame();
         } else {
             return idleAnimation.getActiveFrame();
@@ -163,42 +170,9 @@ public class Player implements KeyListener {
 
     // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage().getHeight();
-        int imageWidth = getPlayerImage().getWidth();
+        int imageHeight = getPlayerImage(true).getHeight();
+        int imageWidth = getPlayerImage(true).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {}
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // Mark the key as pressed
-        pressedKeys[e.getKeyCode()] = true;
-
-        // If any movement key is pressed, switch to walking animation
-        if (isMoving()) {
-            idle = false;  // Player is no longer idle when moving
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // Mark the key as released
-        pressedKeys[e.getKeyCode()] = false;
-
-        // If no movement keys are pressed, switch to idle animation
-        if (!isMoving()) {
-            idle = true;  // Player is idle when no movement key is pressed
-        }
-    }
-
-    // Check if the player is moving (by checking movement keys)
-    private boolean isMoving() {
-        return pressedKeys[KeyEvent.VK_LEFT] ||
-                pressedKeys[KeyEvent.VK_RIGHT] ||
-                pressedKeys[KeyEvent.VK_UP] ||
-                pressedKeys[KeyEvent.VK_DOWN];
     }
 }
