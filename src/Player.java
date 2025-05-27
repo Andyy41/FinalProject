@@ -1,5 +1,3 @@
-package src;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -7,6 +5,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Player implements KeyListener {
@@ -107,32 +106,48 @@ public class Player implements KeyListener {
         }
     }
 
-    public void roll(String direction) {
+    public void roll(String direction) throws InterruptedException {
         double a = xCoord;
         double b = yCoord;
         if (direction.equals("left")) {
-            while (xCoord >= 0 && xCoord > a - 10) {
-                xCoord -= 0.0000001;
-                cooldown();
-                last = 0;
+            if (xCoord >= 0 && xCoord > a - 10) {
+                try {
+                    Thread.sleep(50);
+                    xCoord -= 1;
+                } catch (InterruptedException e) {
+                    // Handle the exception (e.g., log it or re-throw it)
+                    e.printStackTrace();
+                }
             }
         } else if (direction.equals("right")) {
-            while (xCoord <= 920 && xCoord < a + 10) {
-                xCoord += 0.000001;
-                cooldown();
-                last = 0;
+            if (xCoord <= 920 && xCoord < a + 10) {
+                try {
+                    xCoord += 1;
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    // Handle the exception (e.g., log it or re-throw it)
+                    e.printStackTrace();
+                }
             }
         } else if (direction.equals("up")) {
-            while (yCoord > 0 && yCoord > b - 10) {
-                yCoord -= 0.000001;
-                cooldown();
-                last = 0;
+            if (yCoord > 0 && yCoord > b - 10) {
+                try {
+                    Thread.sleep(50);
+                    yCoord -= 1;
+                } catch (InterruptedException e) {
+                    // Handle the exception (e.g., log it or re-throw it)
+                    e.printStackTrace();
+                }
             }
         } else if (direction.equals("down")) {
-            while (yCoord < 435 && yCoord < b + 10) {
-                yCoord += 0.000001;
-                cooldown();
-                last = 0;
+            if (yCoord < 435 && yCoord < b + 10) {
+                try {
+                    Thread.sleep(50);
+                    yCoord += 1;
+                } catch (InterruptedException e) {
+                    // Handle the exception (e.g., log it or re-throw it)
+                    e.printStackTrace();
+                }
             }
         }
     }

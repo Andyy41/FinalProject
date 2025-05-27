@@ -1,5 +1,3 @@
-package src;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -76,19 +74,47 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
 
         if (pressedKeys[65] && pressedKeys[67]) {
-            player.roll("left");
+            for (int i = 0; i < 10; i++) {
+                try {
+                    player.roll("left");
+                    repaint();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         if (pressedKeys[68] && pressedKeys[67]) {
-            player.roll("right");
+            for (int i = 0; i < 10; i++) {
+                try {
+                    player.roll("right");
+                    repaint();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         if (pressedKeys[87] && pressedKeys[67]) {
-            player.roll("up");
+            for (int i = 0; i < 10; i++) {
+                try {
+                    player.roll("up");
+                    repaint();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         if (pressedKeys[83] && pressedKeys[67]) {
-            player.roll("down");
+            for (int i = 0; i < 10; i++) {
+                try {
+                    player.roll("down");
+                    repaint();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
