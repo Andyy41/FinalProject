@@ -55,6 +55,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
+        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -68,7 +69,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
         // and it also checks if the player has "intersected" (collided with) the Coin, and if so,
         // the score goes up and the Coin is removed from the arraylist
-
 
         // draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
