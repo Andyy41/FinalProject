@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Player  {
-    private final int MOVE_AMT = 3;
+    private final int MOVE_AMT = 2;
     private BufferedImage right;
     private BufferedImage left;
     private BufferedImage idled;
@@ -19,17 +19,13 @@ public class Player  {
     private double yCoord;
     private Animation animation;
     private Animation idleAnimation;
-    private long rollCd;
-    private long last;
+    private double rollCd;
 
     public Player() {
         facingRight = true;
         idle = true;
         xCoord = 50;  // Starting position
         yCoord = 435; // On the ground
-        rollCd = 2000;
-        last = 0;
-
         // Load Idle Animation
         ArrayList<BufferedImage> idleImages = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
@@ -65,13 +61,6 @@ public class Player  {
     }
     animation = new Animation(walkImages, 100);
 }
-
-    public void cooldown() {
-        long time = System.currentTimeMillis();
-        if (time > last + rollCd) {
-            last = time;
-        }
-    }
 
     public double getxCoord() {
         return xCoord;
@@ -113,48 +102,24 @@ public class Player  {
         }
     }
 
-    public void roll(String direction) throws InterruptedException {
+    public void roll(String direction) {
         double a = xCoord;
         double b = yCoord;
         if (direction.equals("left")) {
             if (xCoord >= 0 && xCoord > a - 10) {
-                try {
-                    Thread.sleep(50);
-                    xCoord -= 1;
-                } catch (InterruptedException e) {
-                    // Handle the exception (e.g., log it or re-throw it)
-                    e.printStackTrace();
-                }
+                xCoord -= 10;
             }
         } else if (direction.equals("right")) {
             if (xCoord <= 920 && xCoord < a + 10) {
-                try {
-                    xCoord += 1;
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    // Handle the exception (e.g., log it or re-throw it)
-                    e.printStackTrace();
-                }
+                xCoord += 10;
             }
         } else if (direction.equals("up")) {
             if (yCoord > 0 && yCoord > b - 10) {
-                try {
-                    Thread.sleep(50);
-                    yCoord -= 1;
-                } catch (InterruptedException e) {
-                    // Handle the exception (e.g., log it or re-throw it)
-                    e.printStackTrace();
-                }
+                yCoord -= 10;
             }
         } else if (direction.equals("down")) {
             if (yCoord < 435 && yCoord < b + 10) {
-                try {
-                    Thread.sleep(50);
-                    yCoord += 1;
-                } catch (InterruptedException e) {
-                    // Handle the exception (e.g., log it or re-throw it)
-                    e.printStackTrace();
-                }
+                yCoord += 10;
             }
         }
     }

@@ -10,16 +10,25 @@ import java.util.ArrayList;
 
 public class GraphicsPanel extends JPanel implements ActionListener, KeyListener, MouseListener {
     private BufferedImage background;
+    private BufferedImage block;
     private Timer timer;
     private Player player;
     private boolean[] pressedKeys;
+    private double cd;
+    private double baseCd = 270;
 
 
     public GraphicsPanel() {
-        timer = new Timer(2, this);
+        timer = new Timer(5, this);
         timer.start();
+        cd = 0;
         try {
             background = ImageIO.read(new File("src/background.png"));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            block = ImageIO.read(new File("src/BLOCK.png"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -47,6 +56,13 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
         g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        g.drawImage(block, 50, 10, null);
+        g.setFont(new Font("Arial", Font.ITALIC, 14));
+        g.setColor(Color.red);
+        g.drawString(Double.toString(cd), 50, 50);
+        g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+        g.setColor(Color.white);
+        g.drawString("Cooldowns", 50, 30);
 
 
         // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
@@ -82,49 +98,29 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (pressedKeys[83]) {
             player.moveDown();
         }
+        if (cd <= 0) {
+            if (pressedKeys[65] && pressedKeys[67]) {
+                player.roll("left");
+                cd = baseCd;
+            }
 
-        if (pressedKeys[65] && pressedKeys[67]) {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    player.roll("left");
-                    repaint();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            if (pressedKeys[68] && pressedKeys[67]) {
+                player.roll("right");
+                cd = baseCd;
+            }
+
+            if (pressedKeys[87] && pressedKeys[67]) {
+                player.roll("up");
+                cd = baseCd;
+            }
+
+            if (pressedKeys[83] && pressedKeys[67]) {
+                player.roll("down");
+                cd = baseCd;
             }
         }
-
-        if (pressedKeys[68] && pressedKeys[67]) {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    player.roll("right");
-                    repaint();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        if (pressedKeys[87] && pressedKeys[67]) {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    player.roll("up");
-                    repaint();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        if (pressedKeys[83] && pressedKeys[67]) {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    player.roll("down");
-                    repaint();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        if (cd > 0) {
+            cd--;
         }
     }
 
