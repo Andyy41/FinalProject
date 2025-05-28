@@ -41,18 +41,28 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return x;
     }
 
+    private boolean isDiagonalU(){
+        boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println(c);
+        return c;
+    }
+    private boolean isDiagonalD(){
+        boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println(r);
+        return r;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD()), (int) player.getxCoord(), (int) player.getyCoord(), null);
 
 
         // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
         // and it also checks if the player has "intersected" (collided with) the Coin, and if so,
         // the score goes up and the Coin is removed from the arraylist
-
 
         // draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));

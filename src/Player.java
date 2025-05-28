@@ -159,19 +159,29 @@ public class Player  {
         }
     }
 
-    public BufferedImage getPlayerImage(boolean isMoving) {
+    public BufferedImage getPlayerImage(boolean isMoving , boolean isDiagonalU ,boolean isDiagonalD) {
         // If moving, use the walking animation; if idle, use the idle animation
         if (isMoving) {
+            if(isDiagonalU){
+
+            } else if (isDiagonalD){
+
+            }
             return animation.getActiveFrame();
         } else {
+            if (isDiagonalU) {
+
+            }
+            else if (isDiagonalD) {
+            }
             return idleAnimation.getActiveFrame();
         }
     }
 
     // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true).getHeight();
-        int imageWidth = getPlayerImage(true).getWidth();
+        int imageHeight = getPlayerImage(true,false,false).getHeight();
+        int imageWidth = getPlayerImage(true,false,false).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
     }
