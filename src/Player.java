@@ -1,5 +1,7 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +19,8 @@ public class Player  {
     private Animation animation;
     private Animation idleAnimation;
     private Animation rollAnimation;
+    private Animation DUR;
+    private double rollCd;
 
     public Player() {
         facingRight = true;
@@ -47,15 +51,16 @@ public class Player  {
         }
         animation = new Animation(walkImages, 100);
 
-    ArrayList<BufferedImage> IdleUR = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-        String filename = "src\\IdleUR" + i + ".png";
+    ArrayList<BufferedImage> diagonalUR = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+        String filename = "src\\diagonalUR" + i + ".png";
         try {
-            IdleUR.add(ImageIO.read(new File(filename)));
+            diagonalUR.add(ImageIO.read(new File(filename)));
         } catch (IOException e) {
             System.out.println("Error loading walk image: " + filename);
         }
     }
+     DUR = new Animation(diagonalUR, 100);
     animation = new Animation(walkImages, 100);
     ArrayList<BufferedImage> rollImages = new ArrayList<>();
     for (int i = 0; i < 9; i++) {
@@ -138,16 +143,17 @@ public class Player  {
         }
         if (isMoving) {
             if(isDiagonalU){
-
+            return DUR.getActiveFrame();
             } else if (isDiagonalD){
-
+            DUR.getActiveFrame();
             }
             return animation.getActiveFrame();
         } else {
             if (isDiagonalU) {
-
+            return DUR.getActiveFrame();
             }
             else if (isDiagonalD) {
+                return DUR.getActiveFrame();
             }
             return idleAnimation.getActiveFrame();
         }

@@ -54,12 +54,12 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     private boolean isDiagonalU(){
         boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
-        System.out.println(c);
+        System.out.println("IS DU");
         return c;
     }
     private boolean isDiagonalD(){
         boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
-        System.out.println(r);
+        System.out.println("IS DD");
         return r;
     }
 
@@ -80,6 +80,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
+        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
