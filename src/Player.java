@@ -19,6 +19,7 @@ public class Player  {
     private double yCoord;
     private Animation animation;
     private Animation idleAnimation;
+    private Animation DUR;
     private double rollCd;
 
     public Player() {
@@ -50,16 +51,16 @@ public class Player  {
         }
         animation = new Animation(walkImages, 100);
 
-    ArrayList<BufferedImage> IdleUR = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-        String filename = "src\\IdleUR" + i + ".png";
+    ArrayList<BufferedImage> diagonalUR = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+        String filename = "src\\diagonalUR" + i + ".png";
         try {
-            IdleUR.add(ImageIO.read(new File(filename)));
+            diagonalUR.add(ImageIO.read(new File(filename)));
         } catch (IOException e) {
             System.out.println("Error loading walk image: " + filename);
         }
     }
-    animation = new Animation(walkImages, 100);
+     DUR = new Animation(diagonalUR, 100);
 }
 
     public double getxCoord() {
@@ -128,16 +129,17 @@ public class Player  {
         // If moving, use the walking animation; if idle, use the idle animation
         if (isMoving) {
             if(isDiagonalU){
-
+            return DUR.getActiveFrame();
             } else if (isDiagonalD){
-
+            DUR.getActiveFrame();
             }
             return animation.getActiveFrame();
         } else {
             if (isDiagonalU) {
-
+            return DUR.getActiveFrame();
             }
             else if (isDiagonalD) {
+                return DUR.getActiveFrame();
             }
             return idleAnimation.getActiveFrame();
         }

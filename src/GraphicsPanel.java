@@ -50,13 +50,24 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return x;
     }
 
+    private boolean isDiagonalU(){
+        boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println("IS DU");
+        return c;
+    }
+    private boolean isDiagonalD(){
+        boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println("IS DD");
+        return r;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
         g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
