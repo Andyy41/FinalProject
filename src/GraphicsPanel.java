@@ -17,6 +17,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private double cd;
     private double baseCd = 270;
     boolean rolled;
+    boolean right;
+    boolean up;
     int a = 0;
 
 
@@ -70,15 +72,15 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         g.drawImage(background, 0, 0, null);
         if (rolled) {
             if (a < 140) {
-                g.drawImage(player.getPlayerImage(false, false, false, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                g.drawImage(player.getPlayerImage(false, false, false, true , right , up), (int) player.getxCoord(), (int) player.getyCoord(), null);
                 a++;
             } else {
                 rolled = false;
             }
         }
         if (!rolled) {
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , right , up), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , right , up), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -101,6 +103,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (pressedKeys[65]) {
             player.faceLeft();
             player.moveLeft();
+            right = false;
         }
 
 
@@ -108,19 +111,23 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (pressedKeys[68]) {
             player.faceRight();
             player.moveRight();
+            right = true;
         }
 
 
         // player moves up (W)
         if (pressedKeys[87]) {
             player.moveUp();
+            up = true;
         }
 
 
         // player moves down (S)
         if (pressedKeys[83]) {
             player.moveDown();
+            up = false;
         }
+
         if (cd <= 0) {
             if (pressedKeys[65] && pressedKeys[67]) {
                 a = 0;

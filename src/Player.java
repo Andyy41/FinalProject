@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Player  {
+public class Player {
     private final int MOVE_AMT = 2;
     private BufferedImage right;
     private BufferedImage left;
@@ -77,6 +77,7 @@ public class Player  {
         }
         rollAnimation = new Animation(rollImages, 100);
 
+        // Diagonal UP LEFT
         ArrayList<BufferedImage> diagonalUL = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             String filename = "src\\diagonalUL" + i + ".png";
@@ -87,9 +88,6 @@ public class Player  {
             }
         }
         DUL = new Animation(diagonalUL, 100);
-
-
-
 
 
     }
@@ -157,21 +155,21 @@ public class Player  {
         }
     }
 
-    public BufferedImage getPlayerImage(boolean isMoving , boolean isDiagonalU ,boolean isDiagonalD, boolean roll) {
+    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight , boolean facingUp) {
         // If moving, use the walking animation; if idle, use the idle animation
         if (roll) {
             return rollAnimation.getActiveFrame();
         }
         if (isMoving) {
             if(isDiagonalU){
-            return DUR.getActiveFrame();
+                return DUR.getActiveFrame();
             } else if (isDiagonalD){
-            DUL.getActiveFrame();
+                DUL.getActiveFrame();
             }
             return animation.getActiveFrame();
         } else {
             if (isDiagonalU) {
-            return DUR.getActiveFrame();
+                return DUR.getActiveFrame();
             }
             else if (isDiagonalD) {
                 return DUR.getActiveFrame();
@@ -180,11 +178,12 @@ public class Player  {
         }
     }
 
-    // We use a "bounding Rectangle" for detecting collision
-    public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true,false,false, false).getHeight();
-        int imageWidth = getPlayerImage(true,false,false, false).getWidth();
-        Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
-        return rect;
+
+        // We use a "bounding Rectangle" for detecting collision
+        public Rectangle playerRect () {
+            int imageHeight = getPlayerImage(true, false, false, false , false , false).getHeight();
+            int imageWidth = getPlayerImage(true, false, false, false , false , false).getWidth();
+            Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
+            return rect;
+        }
     }
-}
