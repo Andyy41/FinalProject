@@ -20,6 +20,7 @@ public class Player  {
     private Animation idleAnimation;
     private Animation rollAnimation;
     private Animation DUR;
+    private Animation DUL;
     private double rollCd;
     int a;
 
@@ -52,28 +53,46 @@ public class Player  {
         }
         animation = new Animation(walkImages, 100);
 
-    ArrayList<BufferedImage> diagonalUR = new ArrayList<>();
+        // Diagonal UP RIGHT
+        ArrayList<BufferedImage> diagonalUR = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-        String filename = "src\\diagonalUR" + i + ".png";
-        try {
-            diagonalUR.add(ImageIO.read(new File(filename)));
-        } catch (IOException e) {
-            System.out.println("Error loading walk image: " + filename);
+            String filename = "src\\diagonalUR" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
         }
-    }
-     DUR = new Animation(diagonalUR, 100);
-    animation = new Animation(walkImages, 100);
-    ArrayList<BufferedImage> rollImages = new ArrayList<>();
-    for (a = 0; a < 9; a++) {
-        String filename = "src\\Roll" + a + ".png";
-        try {
-            rollImages.add(ImageIO.read(new File(filename)));
-        } catch (IOException e) {
-            System.out.println("Error loading idle image: " + filename);
+        DUR = new Animation(diagonalUR, 100);
+
+        //Roll
+        ArrayList<BufferedImage> rollImages = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            String filename = "src\\Roll" + i + ".png";
+            try {
+                rollImages.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading idle image: " + filename);
+            }
         }
+        rollAnimation = new Animation(rollImages, 100);
+
+        ArrayList<BufferedImage> diagonalUL = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\diagonalUL" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        DUL = new Animation(diagonalUL, 100);
+
+
+
+
+
     }
-    rollAnimation = new Animation(rollImages, 100);
-}
 
     public double getxCoord() {
         return xCoord;
@@ -102,6 +121,7 @@ public class Player  {
             xCoord -= MOVE_AMT;
         }
     }
+
 
     public void moveUp() {
         if (yCoord - MOVE_AMT >= 0) {
@@ -146,7 +166,7 @@ public class Player  {
             if(isDiagonalU){
             return DUR.getActiveFrame();
             } else if (isDiagonalD){
-            DUR.getActiveFrame();
+            DUL.getActiveFrame();
             }
             return animation.getActiveFrame();
         } else {
