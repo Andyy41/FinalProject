@@ -69,7 +69,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
         if (rolled) {
-            if (a < 125) {
+            if (a < 140) {
                 g.drawImage(player.getPlayerImage(false, false, false, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
                 a++;
             } else {
@@ -80,8 +80,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
-        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);

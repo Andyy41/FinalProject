@@ -21,6 +21,7 @@ public class Player  {
     private Animation rollAnimation;
     private Animation DUR;
     private double rollCd;
+    int a;
 
     public Player() {
         facingRight = true;
@@ -63,8 +64,8 @@ public class Player  {
      DUR = new Animation(diagonalUR, 100);
     animation = new Animation(walkImages, 100);
     ArrayList<BufferedImage> rollImages = new ArrayList<>();
-    for (int i = 0; i < 9; i++) {
-        String filename = "src\\Roll" + i + ".png";
+    for (a = 0; a < 9; a++) {
+        String filename = "src\\Roll" + a + ".png";
         try {
             rollImages.add(ImageIO.read(new File(filename)));
         } catch (IOException e) {
