@@ -16,6 +16,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private boolean[] pressedKeys;
     private double cd;
     private double baseCd = 270;
+    boolean rolled;
+    int a = 0;
 
 
     public GraphicsPanel() {
@@ -50,13 +52,34 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return x;
     }
 
+    private boolean isDiagonalU(){
+        boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println(c);
+        return c;
+    }
+    private boolean isDiagonalD(){
+        boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
+        System.out.println(r);
+        return r;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        g.drawImage(player.getPlayerImage(isMoving(),isDiagonalU(),isDiagonalD()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        g.drawImage(player.getPlayerImage(isMoving()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        if (rolled) {
+            if (a < 125) {
+                g.drawImage(player.getPlayerImage(false, false, false, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                a++;
+            } else {
+                rolled = false;
+            }
+        }
+        if (!rolled) {
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
@@ -100,21 +123,29 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
         if (cd <= 0) {
             if (pressedKeys[65] && pressedKeys[67]) {
+                a = 0;
+                rolled = true;
                 player.roll("left");
                 cd = baseCd;
             }
 
             if (pressedKeys[68] && pressedKeys[67]) {
+                a = 0;
+                rolled = true;
                 player.roll("right");
                 cd = baseCd;
             }
 
             if (pressedKeys[87] && pressedKeys[67]) {
+                a = 0;
+                rolled = true;
                 player.roll("up");
                 cd = baseCd;
             }
 
             if (pressedKeys[83] && pressedKeys[67]) {
+                a = 0;
+                rolled = true;
                 player.roll("down");
                 cd = baseCd;
             }

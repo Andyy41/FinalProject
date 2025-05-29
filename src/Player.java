@@ -1,11 +1,8 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Player  {
@@ -19,7 +16,7 @@ public class Player  {
     private double yCoord;
     private Animation animation;
     private Animation idleAnimation;
-    private double rollCd;
+    private Animation rollAnimation;
 
     public Player() {
         facingRight = true;
@@ -60,6 +57,16 @@ public class Player  {
         }
     }
     animation = new Animation(walkImages, 100);
+    ArrayList<BufferedImage> rollImages = new ArrayList<>();
+    for (int i = 0; i < 9; i++) {
+        String filename = "src\\Roll" + i + ".png";
+        try {
+            rollImages.add(ImageIO.read(new File(filename)));
+        } catch (IOException e) {
+            System.out.println("Error loading idle image: " + filename);
+        }
+    }
+    rollAnimation = new Animation(rollImages, 100);
 }
 
     public double getxCoord() {
@@ -124,8 +131,11 @@ public class Player  {
         }
     }
 
-    public BufferedImage getPlayerImage(boolean isMoving , boolean isDiagonalU ,boolean isDiagonalD) {
+    public BufferedImage getPlayerImage(boolean isMoving , boolean isDiagonalU ,boolean isDiagonalD, boolean roll) {
         // If moving, use the walking animation; if idle, use the idle animation
+        if (roll) {
+            return rollAnimation.getActiveFrame();
+        }
         if (isMoving) {
             if(isDiagonalU){
 
@@ -145,8 +155,8 @@ public class Player  {
 
     // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true,false,false).getHeight();
-        int imageWidth = getPlayerImage(true,false,false).getWidth();
+        int imageHeight = getPlayerImage(true,false,false, false).getHeight();
+        int imageWidth = getPlayerImage(true,false,false, false).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
     }
