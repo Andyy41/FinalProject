@@ -1,7 +1,5 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +19,13 @@ public class Player {
     private Animation rollAnimation;
     private Animation DUR;
     private Animation DUL;
+    private Animation frontRoll;
     private double rollCd;
     int a;
+    private boolean b;
 
     public Player() {
+        b = true;
         facingRight = true;
         idle = true;
         xCoord = 50;  // Starting position
@@ -89,7 +90,16 @@ public class Player {
         }
         DUL = new Animation(diagonalUL, 100);
 
-
+        ArrayList<BufferedImage> frontRollImages = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            String filename = "src\\frontRoll" + i + ".png";
+            try {
+                frontRollImages.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading idle image: " + filename);
+            }
+        }
+        frontRoll = new Animation(frontRollImages, 100);
     }
 
     public double getxCoord() {
@@ -156,8 +166,16 @@ public class Player {
     }
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight , boolean facingUp) {
+        if (b) {
+            frontRoll.resetAnim();
+            rollAnimation.resetAnim();
+            b = false;
+        }
         // If moving, use the walking animation; if idle, use the idle animation
         if (roll) {
+            if (facingUp) {
+                return frontRoll.getActiveFrame();
+            }
             return rollAnimation.getActiveFrame();
         }
         if (isMoving) {
@@ -180,10 +198,14 @@ public class Player {
 
 
         // We use a "bounding Rectangle" for detecting collision
-        public Rectangle playerRect () {
-            int imageHeight = getPlayerImage(true, false, false, false , false , false).getHeight();
-            int imageWidth = getPlayerImage(true, false, false, false , false , false).getWidth();
-            Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
-            return rect;
-        }
+    public Rectangle playerRect () {
+        int imageHeight = getPlayerImage(true, false, false, false , false , false).getHeight();
+        int imageWidth = getPlayerImage(true, false, false, false , false , false).getWidth();
+        Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
+        return rect;
     }
+
+    public void resetB () {
+        b = true;
+    }
+}
