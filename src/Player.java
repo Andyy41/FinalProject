@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class Player {
@@ -21,6 +22,11 @@ public class Player {
     private Animation rollAnimation;
     private Animation DUR;
     private Animation DUL;
+    private Animation DDR;
+    private Animation DDL;
+    private Animation UP;
+    private Animation RIGHT;
+    private Animation LEFT;
     private double rollCd;
     int a;
 
@@ -89,8 +95,67 @@ public class Player {
         }
         DUL = new Animation(diagonalUL, 100);
 
+        //Diagonal DOWN LEFT
+        ArrayList<BufferedImage> diagonalDL = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\diagonalDL" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        DDL = new Animation(diagonalDL, 100);
 
+        //Diagonal Down Left
+        ArrayList<BufferedImage> diagonalDR = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\diagonalDR" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        DDR = new Animation(diagonalUL, 100);
+
+        //UP
+        ArrayList<BufferedImage> UPF = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\UP" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        UP = new Animation(UPF, 100);
+
+        //Right
+        ArrayList<BufferedImage> right = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\Right" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        RIGHT = new Animation(right, 100);
+        //LEFT
+        ArrayList<BufferedImage> left = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            String filename = "src\\Left" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
+        }
+        LEFT = new Animation(left, 100);
     }
+
+
 
     public double getxCoord() {
         return xCoord;
@@ -157,27 +222,28 @@ public class Player {
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight , boolean facingUp) {
         // If moving, use the walking animation; if idle, use the idle animation
+        String Pos = "";
         if (roll) {
             return rollAnimation.getActiveFrame();
         }
         if (isMoving) {
-            if(isDiagonalU){
-                return DUR.getActiveFrame();
-            } else if (isDiagonalD){
-                DUL.getActiveFrame();
-            }
-            return animation.getActiveFrame();
-        } else {
-            if (isDiagonalU) {
-                return DUR.getActiveFrame();
-            }
-            else if (isDiagonalD) {
-                return DUR.getActiveFrame();
-            }
-            return idleAnimation.getActiveFrame();
+            if (isDiagonalU && facingRight) {
+                Pos = "DUR";
+            } else Pos = "DUL";
+            if (isDiagonalD && facingRight) {
+                Pos = "DDR"; // DDR
+            } else
+                Pos = "DDL"; // DDL
+            if (facingUp) {
+                Pos = "Up";
+            } else Pos = "DOWN";// WD
+            if (facingRight) {
+                Pos = "RIGHT";//WR
+            } else Pos = "Left";// WL
+            return Pos +
         }
+        return idleAnimation.getActiveFrame();
     }
-
 
         // We use a "bounding Rectangle" for detecting collision
         public Rectangle playerRect () {
