@@ -22,6 +22,7 @@ public class Player {
     private Animation rollAnimation;
     private Animation DUR;
     private Animation DUL;
+    private Animation frontRoll;
     private Animation DDR;
     private Animation DDL;
     private Animation UP;
@@ -29,8 +30,10 @@ public class Player {
     private Animation LEFT;
     private double rollCd;
     int a;
+    private boolean b;
 
     public Player() {
+        b = true;
         facingRight = true;
         idle = true;
         xCoord = 50;  // Starting position
@@ -95,67 +98,40 @@ public class Player {
         }
         DUL = new Animation(diagonalUL, 100);
 
-        //Diagonal DOWN LEFT
-        ArrayList<BufferedImage> diagonalDL = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            String filename = "src\\diagonalDL" + i + ".png";
+        ArrayList<BufferedImage> frontRollImages = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            String filename = "src\\frontRoll" + i + ".png";
             try {
-                diagonalUR.add(ImageIO.read(new File(filename)));
+                frontRollImages.add(ImageIO.read(new File(filename)));
             } catch (IOException e) {
-                System.out.println("Error loading walk image: " + filename);
+                System.out.println("Error loading idle image: " + filename);
             }
         }
-        DDL = new Animation(diagonalDL, 100);
+        frontRoll = new Animation(frontRollImages, 100);
 
-        //Diagonal Down Left
-        ArrayList<BufferedImage> diagonalDR = new ArrayList<>();
+    ArrayList<BufferedImage> diagonalDL = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            String filename = "src\\diagonalDR" + i + ".png";
-            try {
-                diagonalUR.add(ImageIO.read(new File(filename)));
-            } catch (IOException e) {
-                System.out.println("Error loading walk image: " + filename);
-            }
+        String filename = "src\\diagonalDL" + i + ".png";
+        try {
+            diagonalUR.add(ImageIO.read(new File(filename)));
+        } catch (IOException e) {
+            System.out.println("Error loading walk image: " + filename);
         }
-        DDR = new Animation(diagonalUL, 100);
-
-        //UP
-        ArrayList<BufferedImage> UPF = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            String filename = "src\\UP" + i + ".png";
-            try {
-                diagonalUR.add(ImageIO.read(new File(filename)));
-            } catch (IOException e) {
-                System.out.println("Error loading walk image: " + filename);
-            }
-        }
-        UP = new Animation(UPF, 100);
-
-        //Right
-        ArrayList<BufferedImage> right = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            String filename = "src\\Right" + i + ".png";
-            try {
-                diagonalUR.add(ImageIO.read(new File(filename)));
-            } catch (IOException e) {
-                System.out.println("Error loading walk image: " + filename);
-            }
-        }
-        RIGHT = new Animation(right, 100);
-        //LEFT
-        ArrayList<BufferedImage> left = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            String filename = "src\\Left" + i + ".png";
-            try {
-                diagonalUR.add(ImageIO.read(new File(filename)));
-            } catch (IOException e) {
-                System.out.println("Error loading walk image: " + filename);
-            }
-        }
-        LEFT = new Animation(left, 100);
     }
+    DDL = new Animation(diagonalDL, 100);
 
-
+    //Diagonal Down Left
+    ArrayList<BufferedImage> diagonalDR = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+        String filename = "src\\diagonalDR" + i + ".png";
+        try {
+            diagonalUR.add(ImageIO.read(new File(filename)));
+        } catch (IOException e) {
+            System.out.println("Error loading walk image: " + filename);
+        }
+    }
+    DDR = new Animation(diagonalUL, 100);
+    }
 
     public double getxCoord() {
         return xCoord;
@@ -221,9 +197,17 @@ public class Player {
     }
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight , boolean facingUp) {
+        if (b) {
+            frontRoll.resetAnim();
+            rollAnimation.resetAnim();
+            b = false;
+        }
         // If moving, use the walking animation; if idle, use the idle animation
         String Pos = "";
         if (roll) {
+            if (facingUp) {
+                return frontRoll.getActiveFrame();
+            }
             return rollAnimation.getActiveFrame();
         }
         if (isMoving) {
@@ -245,11 +229,15 @@ public class Player {
         return idleAnimation.getActiveFrame();
     }
 
+
         // We use a "bounding Rectangle" for detecting collision
-        public Rectangle playerRect () {
-            int imageHeight = getPlayerImage(true, false, false, false , false , false).getHeight();
-            int imageWidth = getPlayerImage(true, false, false, false , false , false).getWidth();
-            Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
-            return rect;
-        }
+    public Rectangle playerRect () {
+        int imageHeight = getPlayerImage(true, false, false, false , false , false).getHeight();
+        int imageWidth = getPlayerImage(true, false, false, false , false , false).getWidth();
+        Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
+        return rect;
+    }
+
+    public void resetB () {
+        b = true;
     }

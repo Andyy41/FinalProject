@@ -20,6 +20,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     boolean right;
     boolean up;
     int a = 0;
+    String direction;
 
 
     public GraphicsPanel() {
@@ -70,12 +71,23 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
+        if (a == 0) {
+            player.resetB();
+        }
         if (rolled) {
-            if (a < 140) {
-                g.drawImage(player.getPlayerImage(false, false, false, true , right , up), (int) player.getxCoord(), (int) player.getyCoord(), null);
-                a++;
+            if (direction.equals("down")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, false, false, true, right, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
             } else {
-                rolled = false;
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, false, false, true, right, false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    a++;
+                } else {
+                    rolled = false;}
             }
         }
         if (!rolled) {
@@ -130,30 +142,34 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
         if (cd <= 0) {
             if (pressedKeys[65] && pressedKeys[67]) {
+                direction = "left";
                 a = 0;
                 rolled = true;
-                player.roll("left");
+                player.roll(direction);
                 cd = baseCd;
             }
 
             if (pressedKeys[68] && pressedKeys[67]) {
+                direction = "right";
                 a = 0;
                 rolled = true;
-                player.roll("right");
+                player.roll(direction);
                 cd = baseCd;
             }
 
             if (pressedKeys[87] && pressedKeys[67]) {
+                direction = "up";
                 a = 0;
                 rolled = true;
-                player.roll("up");
+                player.roll(direction);
                 cd = baseCd;
             }
 
             if (pressedKeys[83] && pressedKeys[67]) {
+                direction = "down";
                 a = 0;
                 rolled = true;
-                player.roll("down");
+                player.roll(direction);
                 cd = baseCd;
             }
         }
