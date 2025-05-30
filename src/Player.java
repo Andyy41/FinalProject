@@ -109,28 +109,28 @@ public class Player {
         }
         frontRoll = new Animation(frontRollImages, 100);
 
-    ArrayList<BufferedImage> diagonalDL = new ArrayList<>();
+        ArrayList<BufferedImage> diagonalDL = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-        String filename = "src\\diagonalDL" + i + ".png";
-        try {
-            diagonalUR.add(ImageIO.read(new File(filename)));
-        } catch (IOException e) {
-            System.out.println("Error loading walk image: " + filename);
+            String filename = "src\\diagonalDL" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
         }
-    }
-    DDL = new Animation(diagonalDL, 100);
+        DDL = new Animation(diagonalDL, 100);
 
-    //Diagonal Down Left
-    ArrayList<BufferedImage> diagonalDR = new ArrayList<>();
+        //Diagonal Down Left
+        ArrayList<BufferedImage> diagonalDR = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-        String filename = "src\\diagonalDR" + i + ".png";
-        try {
-            diagonalUR.add(ImageIO.read(new File(filename)));
-        } catch (IOException e) {
-            System.out.println("Error loading walk image: " + filename);
+            String filename = "src\\diagonalDR" + i + ".png";
+            try {
+                diagonalUR.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading walk image: " + filename);
+            }
         }
-    }
-    DDR = new Animation(diagonalUL, 100);
+        DDR = new Animation(diagonalUL, 100);
     }
 
     public double getxCoord() {
