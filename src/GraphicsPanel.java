@@ -68,6 +68,29 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return r;
     }
 
+    private boolean isUP(){
+        boolean w = pressedKeys[KeyEvent.VK_W];
+        System.out.println("IS UP");
+        return w;
+    }
+
+    private boolean isDown(){
+        boolean s = pressedKeys[KeyEvent.VK_S];
+        System.out.println("IS DOWN");
+        return s;
+    }
+
+    private boolean isRight(){
+        boolean d = pressedKeys[KeyEvent.VK_D];
+        System.out.println("IS RIGHT");
+        return d;
+    }
+
+    private boolean isLeft(){
+        boolean a = pressedKeys[KeyEvent.VK_A];
+        System.out.println("IS LEFT");
+        return a;
+    }
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -86,14 +109,14 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
                 }
             } else if (direction.equals("upr")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, true, false, true, true, false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, true, false, true, right,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
                 }
             } else if (direction.equals("up")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, false, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, false, false, true, right,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
@@ -107,8 +130,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             }
         }
         if (!rolled) {
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , right , left, up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , right ,left, up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false ,isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -130,28 +153,24 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         // player moves left (A)
         if (pressedKeys[65]) {
             player.moveLeft();
-            right = false;
         }
 
 
         // player moves right (D)
         if (pressedKeys[68]) {
             player.moveRight();
-            right = true;
         }
 
 
         // player moves up (W)
         if (pressedKeys[87]) {
             player.moveUp();
-            up = true;
         }
 
 
         // player moves down (S)
         if (pressedKeys[83]) {
             player.moveDown();
-            up = false;
         }
 
         if (cd <= 0) {
