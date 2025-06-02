@@ -31,8 +31,6 @@ public class Player {
 
     public Player() {
         b = true;
-        facingRight = true;
-        idle = true;
         xCoord = 50;  // Starting position
         yCoord = 435; // On the ground
         // Load Idle Animation
@@ -127,7 +125,7 @@ public class Player {
                 System.out.println("Error loading walk image: " + filename);
             }
         }
-        DDR = new Animation(diagonalUL, 100);
+        DDR = new Animation(diagonalDR, 100);
 
         //UP
         ArrayList<BufferedImage> UPR = new ArrayList<>();
@@ -178,13 +176,6 @@ public class Player {
         return yCoord;
     }
 
-    public void faceRight() {
-        facingRight = true;
-    }
-
-    public void faceLeft() {
-        facingRight = false;
-    }
 
     public void moveRight() {
         if (xCoord + MOVE_AMT <= 920) {
@@ -233,7 +224,7 @@ public class Player {
         }
     }
 
-    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight, boolean facingUp) {
+    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown) {
         if (b) {
             frontRoll.resetAnim();
             rollAnimation.resetAnim();
@@ -256,21 +247,22 @@ public class Player {
             } else if (isDiagonalD) {
                 return DDL.getActiveFrame(); // DDL
             } else if (facingUp) {
-                return animation.getActiveFrame();
+                return UP.getActiveFrame();
+            } else if (facingDown){
+                    return animation.getActiveFrame();
             } else if (facingRight) {
                 return RIGHT.getActiveFrame(); // WR
-            } else {
+            } else if(facingLeft)
                 return LEFT.getActiveFrame(); // WL
             }
-        }
         return idleAnimation.getActiveFrame();
     }
 
 
         // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true, false, false, false, false, false).getHeight();
-        int imageWidth = getPlayerImage(true, false, false, false, false, false).getWidth();
+        int imageHeight = getPlayerImage(true, false, false, false, false, false, false, false).getHeight();
+        int imageWidth = getPlayerImage(true, false, false, false, false, false,false,false).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
     }
