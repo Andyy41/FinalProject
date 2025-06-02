@@ -77,7 +77,21 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (rolled) {
             if (direction.equals("down")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, false, true, true, right, false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
+            } else if (direction.equals("upr")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, true, false, true, true, false), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
+            } else if (direction.equals("up")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, false, false, true, false, true), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
@@ -158,11 +172,15 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             }
 
             if (pressedKeys[87] && pressedKeys[67]) {
-                direction = "up";
-                a = 0;
-                rolled = true;
-                player.roll(direction);
-                cd = baseCd;
+                if (pressedKeys[68]) {
+                    direction = "upr";
+                } else {
+                    direction = "up";
+                    a = 0;
+                    rolled = true;
+                    player.roll(direction);
+                    cd = baseCd;
+                }
             }
 
             if (pressedKeys[83] && pressedKeys[67]) {
