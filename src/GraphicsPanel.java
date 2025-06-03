@@ -13,6 +13,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private BufferedImage block;
     private Timer timer;
     private Player player;
+    private Enemy enemy;
     private boolean[] pressedKeys;
     private double cd;
     private double baseCd = 270;
@@ -21,6 +22,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     boolean left;
     boolean up;
     boolean down;
+    boolean enemyAlive;
     int a = 0;
     String direction;
 
@@ -40,6 +42,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             System.out.println(e.getMessage());
         }
         player = new Player();
+        enemy = new Enemy(10,1,2,1);
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
         addMouseListener(this);
@@ -138,6 +141,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (!rolled) {
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false ,isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        }
+        if(enemyAlive){
+            g.drawImage(enemy.getEnemyImage(enemyAlive), (int) enemy.getxCoord(), (int) enemy.getyCoord(), null);
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
