@@ -102,28 +102,34 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (rolled) {
             if (direction.equals("down")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right, left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, false, false, true, right, left,up,true), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
                 }
             } else if (direction.equals("upr")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, true, false, true, right,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
                 }
             } else if (direction.equals("up")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, false, false, true, right,left,true,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
                     a++;
                 } else {
                     rolled = false;
                 }
-            } else {
+            } else if (direction.equals("right")) {
                 if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    g.drawImage(player.getPlayerImage(false, false, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
+                    a++;
+                } else {
+                    rolled = false;}
+            } else if (direction.equals("left")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, false, false, true, false,true,false,false), (int) player.getxCoord(), (int) player.getyCoord(), -16, 15, null);
                     a++;
                 } else {
                     rolled = false;}

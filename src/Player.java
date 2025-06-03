@@ -260,10 +260,13 @@ public class Player {
                 return upRoll.getActiveFrame();
             } else if (isDiagonalU && facingRight) {
                 return diagRoll.getActiveFrame();
-            } else if (isDiagonalD) {
+            } else if (facingDown) {
                 return frontRoll.getActiveFrame();
+            } else if (facingRight) {
+                return rollAnimation.getActiveFrame();
+            } else if (facingLeft) {
+                return rollAnimation.getActiveFrame();
             }
-            return rollAnimation.getActiveFrame();
         }
         if (isMoving) {
             if (isDiagonalU && facingRight) {
