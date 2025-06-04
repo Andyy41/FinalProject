@@ -193,6 +193,14 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             }
         }
 
+        if (player.isInvincible() && (System.currentTimeMillis() / 100) % 2 == 0) {
+            // Draw nothing or transparent to simulate flashing
+        } else {
+            g.drawImage(player.getPlayerImage(...), ...);
+        }
+
+
+
         // draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));
 
