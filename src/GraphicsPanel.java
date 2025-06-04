@@ -56,42 +56,42 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
                 pressedKeys[KeyEvent.VK_D] ||
                 pressedKeys[KeyEvent.VK_W] ||
                 pressedKeys[KeyEvent.VK_S];
-        System.out.println(x);
+        //System.out.println(x);
         return x;
     }
 
     private boolean isDiagonalU(){
         boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
-        System.out.println("IS DU");
+        //System.out.println("IS DU");
         return c;
     }
     private boolean isDiagonalD(){
         boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
-        System.out.println("IS DD");
+        //System.out.println("IS DD");
         return r;
     }
 
     private boolean isUP(){
         boolean w = pressedKeys[KeyEvent.VK_W];
-        System.out.println("IS UP");
+        //System.out.println("IS UP");
         return w;
     }
 
     private boolean isDown(){
         boolean s = pressedKeys[KeyEvent.VK_S];
-        System.out.println("IS DOWN");
+        //System.out.println("IS DOWN");
         return s;
     }
 
     private boolean isRight(){
         boolean d = pressedKeys[KeyEvent.VK_D];
-        System.out.println("IS RIGHT");
+        //System.out.println("IS RIGHT");
         return d;
     }
 
     private boolean isLeft(){
         boolean a = pressedKeys[KeyEvent.VK_A];
-        System.out.println("IS LEFT");
+        //System.out.println("IS LEFT");
         return a;
     }
     @Override
@@ -136,6 +136,27 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
                     a++;
                 } else {
                     rolled = false;}
+            } else if (direction.equals("upl")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord() + 13, (int) player.getyCoord() + 7, -16, 15, null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
+            } else if (direction.equals("dr")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), 16, -15,  null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
+            } else if (direction.equals("dl")) {
+                if (a < 85) {
+                    g.drawImage(player.getPlayerImage(false, false, true, true, false,true,up,down), (int) player.getxCoord(), (int) player.getyCoord(), -16, 15, null);
+                    a++;
+                } else {
+                    rolled = false;
+                }
             }
         }
         if (!rolled) {
@@ -185,7 +206,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             player.moveDown();
         }
 
-        if (cd <= 0) {
+        if (cd == 0) {
             if (pressedKeys[65] && pressedKeys[67]) {
                 direction = "left";
                 a = 0;
@@ -205,6 +226,18 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             if (pressedKeys[87] && pressedKeys[67]) {
                 if (pressedKeys[68]) {
                     direction = "upr";
+                    a = 0;
+                    rolled = true;
+                    player.roll("up");
+                    player.roll("right");
+                    cd = baseCd;
+                } else if (pressedKeys[65]) {
+                    direction = "upl";
+                    a = 0;
+                    rolled = true;
+                    player.roll("up");
+                    player.roll("left");
+                    cd = baseCd;
                 } else {
                     direction = "up";
                     a = 0;
@@ -214,12 +247,35 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
                 }
             }
 
-            if (pressedKeys[83] && pressedKeys[67]) {
-                direction = "down";
-                a = 0;
-                rolled = true;
-                player.roll(direction);
-                cd = baseCd;
+            if (pressedKeys[67]) {
+                if (pressedKeys[83]) {
+                    System.out.println("ahgajhg");
+                    if (pressedKeys[68]) {
+                        System.out.println("test");
+                        direction = "dr";
+                        a = 0;
+                        rolled = true;
+                        player.roll("down");
+                        player.roll("right");
+                        cd = baseCd;
+                    } else if (pressedKeys[65]) {
+                        System.out.println("a");
+                        direction = "dl";
+                        a = 0;
+                        rolled = true;
+                        player.roll("down");
+                        player.roll("left");
+                        cd = baseCd;
+                    } else {
+                        System.out.println("r");
+                        direction = "down";
+                        a = 0;
+                        rolled = true;
+                        player.roll(direction);
+                        cd = baseCd;
+                    }
+                }
+                System.out.println("ghagghagskhgkahgk");
             }
         }
         if (cd > 0) {

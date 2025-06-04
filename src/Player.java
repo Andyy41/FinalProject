@@ -26,6 +26,7 @@ public class Player {
     private Animation RIGHT;
     private Animation LEFT;
     private Animation upRoll;
+    private Animation diagRollDown;
     private double rollCd;
     private Animation diagRoll;
     int a;
@@ -184,6 +185,16 @@ public class Player {
             }
         }
         diagRoll = new Animation(diagRollImages, 100);
+        ArrayList<BufferedImage> diagRollDownImages = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            String filename = "src\\DiagRollDown" + i + ".png";
+            try {
+                diagRollDownImages.add(ImageIO.read(new File(filename)));
+            } catch (IOException e) {
+                System.out.println("Error loading idle image: " + filename);
+            }
+        }
+        diagRollDown = new Animation(diagRollDownImages, 100);
     }
 
 
@@ -252,6 +263,7 @@ public class Player {
             rollAnimation.resetAnim();
             diagRoll.resetAnim();
             upRoll.resetAnim();
+            diagRollDown.resetAnim();
             b = false;
         }
         // If moving, use the walking animation; if idle, use the idle animation
@@ -260,6 +272,8 @@ public class Player {
                 return upRoll.getActiveFrame();
             } else if (isDiagonalU && facingRight) {
                 return diagRoll.getActiveFrame();
+            } else if (isDiagonalD && facingRight) {
+                return diagRollDown.getActiveFrame();
             } else if (facingDown) {
                 return frontRoll.getActiveFrame();
             } else if (facingRight) {
