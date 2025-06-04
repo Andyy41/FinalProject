@@ -7,11 +7,6 @@ import java.util.ArrayList;
 
 public class Player {
     private final int MOVE_AMT = 2;
-    private BufferedImage right;
-    private BufferedImage left;
-    private BufferedImage idled;
-    private boolean idle;
-    private boolean facingRight;
     private double xCoord;
     private double yCoord;
     private Animation animation;
@@ -31,8 +26,11 @@ public class Player {
     private Animation diagRoll;
     int a;
     private boolean b;
+    private int HP;
+    private int DMG;
 
     public Player() {
+        HP = 100;
         b = true;
         xCoord = 50;  // Starting position
         yCoord = 435; // On the ground
@@ -209,6 +207,10 @@ public class Player {
         return yCoord;
     }
 
+    public void Hit(){
+        HP -= CommonEnemy.get
+    }
+
 
     public void moveRight() {
         if (xCoord + MOVE_AMT <= 920) {
@@ -256,6 +258,7 @@ public class Player {
             }
         }
     }
+
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown) {
         if (b) {

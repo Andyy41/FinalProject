@@ -44,6 +44,8 @@ public class Enemy {
             System.out.println(e.getMessage());
         }
     }
+
+
     public double getxCoord() {
         return xCoord;
     }
@@ -82,6 +84,7 @@ public class Enemy {
         }
         return DEAD;
     }
+
     public Rectangle EnemyRect() {
         int imageHeight = getEnemyImage(alive).getHeight();
         int imageWidth = getEnemyImage(alive).getWidth();

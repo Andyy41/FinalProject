@@ -22,7 +22,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     boolean left;
     boolean up;
     boolean down;
-    boolean enemyAlive;
     int a = 0;
     String direction;
 
@@ -94,6 +93,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         //System.out.println("IS LEFT");
         return a;
     }
+
+    private boolean isEnemyAlive(){
+        return enemy.getHp() > 0;
+    }
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -163,8 +166,11 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false ,isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
-        if(enemyAlive){
-            g.drawImage(enemy.getEnemyImage(enemyAlive), (int) enemy.getxCoord(), (int) enemy.getyCoord(), null);
+        if(isEnemyAlive()){
+            g.drawImage(enemy.getEnemyImage(isEnemyAlive()), (int) enemy.getxCoord(), (int) enemy.getyCoord(), null);
+        }
+        if(player.playerRect().intersects(CommonEnemy.EnemyRect())){
+            player.Hit();
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
