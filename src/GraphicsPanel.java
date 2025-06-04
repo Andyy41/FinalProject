@@ -13,7 +13,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private BufferedImage block;
     private Timer timer;
     private Player player;
-    private Enemy enemy;
+   // private Enemy enemy;
     private boolean[] pressedKeys;
     private double cd;
     private double baseCd = 270;
@@ -24,6 +24,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     boolean down;
     int a = 0;
     String direction;
+    private ArrayList<Enemy> enemies;
+
+
 
 
     public GraphicsPanel() {
@@ -40,8 +43,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        enemies = new ArrayList<>();
+        enemies.add(new CommonEnemy(5,1,1,1,"src\\Enemy.png" , "src\\EnemyDeath.png"));
+
         player = new Player();
-        enemy = new Enemy(10,1,2,1);
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
         addMouseListener(this);
@@ -94,9 +99,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return a;
     }
 
-    private boolean isEnemyAlive(){
-        return enemy.getHp() > 0;
-    }
+
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -166,12 +170,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false ,isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
-        if(isEnemyAlive()){
-            g.drawImage(enemy.getEnemyImage(isEnemyAlive()), (int) enemy.getxCoord(), (int) enemy.getyCoord(), null);
-        }
-        if(player.playerRect().intersects(CommonEnemy.EnemyRect())){
-            player.Hit();
-        }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
@@ -179,11 +177,21 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         g.setFont(new Font("Times New Roman", Font.BOLD, 22));
         g.setColor(Color.white);
         g.drawString("Cooldowns", 50, 30);
+        g.drawString("HP:" + player.GetHP(), 50, 60);
+        if (player.isInvincible()) {
+            long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
+            if (elapsed >= player.getInvincibilityDuration()) {
+                player.setInvincible(false);
+            }
+        }
 
+        for (Enemy enemy : enemies) {
+            g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
 
-        // this loop does two things:  it draws each Coin that gets placed with mouse clicks,
-        // and it also checks if the player has "intersected" (collided with) the Coin, and if so,
-        // the score goes up and the Coin is removed from the arraylist
+            if (player.playerRect().intersects(enemy.getBoundingBox())) {
+                player.Hit((CommonEnemy) enemy);  // You must have this method in Player class
+            }
+        }
 
         // draw score
         g.setFont(new Font("Courier New", Font.BOLD, 24));

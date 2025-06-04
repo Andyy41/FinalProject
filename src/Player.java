@@ -28,6 +28,10 @@ public class Player {
     private boolean b;
     private int HP;
     private int DMG;
+    private boolean invincible = false;
+    private long invincibleStartTime;
+    private final long invincibilityDuration = 500; // milliseconds (0.5 second)
+
 
     public Player() {
         HP = 100;
@@ -207,8 +211,34 @@ public class Player {
         return yCoord;
     }
 
-    public void Hit(){
-        HP -= CommonEnemy.get
+    public void Hit(CommonEnemy enemy) {
+        if (!invincible) {
+            HP -= enemy.getDmg();
+            invincible = true;
+            invincibleStartTime = System.currentTimeMillis();
+        }
+    }
+
+
+    public int GetHP(){
+        return HP;
+   }
+
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    public void setInvincible(boolean value) {
+        invincible = value;
+    }
+
+    public long getInvincibleStartTime() {
+        return invincibleStartTime;
+    }
+
+    public long getInvincibilityDuration() {
+        return invincibilityDuration;
     }
 
 
