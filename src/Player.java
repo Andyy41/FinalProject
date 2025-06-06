@@ -1,8 +1,10 @@
 import javax.imageio.ImageIO;
+import javax.swing.plaf.PanelUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 public class Player {
@@ -30,8 +32,11 @@ public class Player {
     private int DMG;
     private boolean invincible = false;
     private long invincibleStartTime;
-    private final long invincibilityDuration = 500; // milliseconds (0.5 second)
-
+    private final long invincibilityDuration = 2000;// 500 milliseconds (0.5 second)
+    private BufferedImage hitIFRAME;
+    private boolean isFlashing = false; // Flag to toggle visibility
+    private long lastFlashTime = 0; // Store the time of the last flash toggle
+    private final long flashDuration = 500; // Flash every 150 ms (adjust as needed)
 
     public Player() {
         HP = 100;
@@ -197,11 +202,29 @@ public class Player {
             }
         }
         diagRollDown = new Animation(diagRollDownImages, 100);
+
+        try {
+            hitIFRAME = ImageIO.read(new File("src\\IFRAME.png"));
+        } catch (IOException e) {
+            System.out.println("Failed to load alive sprite: " + e.getMessage());
+        }
     }
 
-
-
-
+    // Method to toggle visibility while invincible
+    public void updateFlashing() {
+        if (invincible) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastFlashTime >= flashDuration) {
+                isFlashing = !isFlashing; // Toggle visibility
+                lastFlashTime = currentTime;
+            }
+        } else {
+            isFlashing = false; // Ensure player is visible when not invincible
+        }
+    }
+    public boolean isFlashing() {
+        return isFlashing;
+    }
 
     public double getxCoord() {
         return xCoord;
@@ -211,11 +234,12 @@ public class Player {
         return yCoord;
     }
 
-    public void Hit(CommonEnemy enemy) {
+    public void Hit(Enemy enemy) {
         if (!invincible) {
             HP -= enemy.getDmg();
             invincible = true;
             invincibleStartTime = System.currentTimeMillis();
+            updateFlashing();
         }
     }
 
@@ -267,74 +291,71 @@ public class Player {
         }
     }
 
-    public void roll(String direction) {
-        double a = xCoord;
-        double b = yCoord;
-        if (direction.equals("left")) {
-            if (xCoord >= 0 && xCoord > a - 10) {
-                xCoord -= 10;
-            }
-        } else if (direction.equals("right")) {
-            if (xCoord <= 920 && xCoord < a + 10) {
-                xCoord += 10;
-            }
-        } else if (direction.equals("up")) {
-            if (yCoord > 0 && yCoord > b - 10) {
-                yCoord -= 10;
-            }
-        } else if (direction.equals("down")) {
-            if (yCoord < 435 && yCoord < b + 10) {
-                yCoord += 10;
-            }
-        }
+    public BufferedImage getHitIFRAME(){
+        return hitIFRAME;
     }
+
 
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown) {
-        if (b) {
-            frontRoll.resetAnim();
-            rollAnimation.resetAnim();
-            diagRoll.resetAnim();
-            upRoll.resetAnim();
-            diagRollDown.resetAnim();
-            b = false;
-        }
-        // If moving, use the walking animation; if idle, use the idle animation
         if (roll) {
             if (facingUp) {
+                yCoord -= 5;
                 return upRoll.getActiveFrame();
-            } else if (isDiagonalU && facingRight) {
+            }
+            else if (isDiagonalU && facingRight) {
+                yCoord += 5;
+                xCoord += 5;
                 return diagRoll.getActiveFrame();
-            } else if (isDiagonalD && facingRight) {
+            }
+            else if(isDiagonalU && facingLeft){
+                    yCoord+= 5;
+                    xCoord -= 5;
+                    return diagRoll.getActiveFrame();
+            }
+            else if (isDiagonalD && facingRight) {
+                yCoord += 5;
+                xCoord += 5;
                 return diagRollDown.getActiveFrame();
-            } else if (facingDown) {
+            }
+            else if(isDiagonalD && facingLeft){
+                yCoord +=5;
+                xCoord -= 5;
+                return  diagRollDown.getActiveFrame();
+            }
+            else if (facingDown) {
+                yCoord += 5;
                 return frontRoll.getActiveFrame();
             } else if (facingRight) {
+                xCoord += 5;
                 return rollAnimation.getActiveFrame();
             } else if (facingLeft) {
+                xCoord -= 5;
                 return rollAnimation.getActiveFrame();
             }
+            return rollAnimation.getActiveFrame();
         }
-        if (isMoving) {
-            if (isDiagonalU && facingRight) {
-                return DUR.getActiveFrame();
-            } else if (isDiagonalU) {
-                return DUL.getActiveFrame();
-            } else if (isDiagonalD && facingRight) {
-                return DDR.getActiveFrame(); // DDR
-            } else if (isDiagonalD) {
-                return DDL.getActiveFrame(); // DDL
-            } else if (facingUp) {
-                return UP.getActiveFrame();
-            } else if (facingDown){
+            if (isMoving) {
+                if (isDiagonalU && facingRight) {
+                    return DUR.getActiveFrame();
+                } else if (isDiagonalU) {
+                    return DUL.getActiveFrame();
+                } else if (isDiagonalD && facingRight) {
+                    return DDR.getActiveFrame(); // DDR
+                } else if (isDiagonalD) {
+                    return DDL.getActiveFrame(); // DDL
+                } else if (facingUp) {
+                    return UP.getActiveFrame();
+                } else if (facingDown) {
                     return animation.getActiveFrame();
-            } else if (facingRight) {
-                return RIGHT.getActiveFrame(); // WR
-            } else if(facingLeft)
-                return LEFT.getActiveFrame(); // WL
+                } else if (facingRight) {
+                    return RIGHT.getActiveFrame(); // WR
+                } else if (facingLeft)
+                    return LEFT.getActiveFrame(); // WL
             }
         return idleAnimation.getActiveFrame();
     }
+
 
 
         // We use a "bounding Rectangle" for detecting collision
@@ -348,4 +369,5 @@ public class Player {
     public void resetB() {
         b = true;
     }
+
 }

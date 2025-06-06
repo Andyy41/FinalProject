@@ -4,36 +4,33 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public  class Enemy {
-    protected int hp;
-    protected int dmg;
-    protected int speed;
-    protected double dmgD;
-    protected boolean alive;
-    protected double xCoord;
-    protected double yCoord;
-    protected BufferedImage aliveSprite;
-    protected BufferedImage deadSprite;
+public abstract class Enemy {
+    int hp;
+    int dmg;
+    double speed;
+    double dmgD;
+    boolean alive;
+    double xCoord;
+    double yCoord;
+    double spawnx;
+    double spawny;
+    BufferedImage aliveSprite;
+    BufferedImage deadSprite;
 
-    public Enemy(int hp, int dmg, int speed, double dmgD, String aliveImagePath, String deadImagePath) {
+
+    public Enemy(int hp, int dmg, double speed, double dmgD, double spawnx, double spawny, String aliveImagePath) {
         this.hp = hp;
         this.dmg = dmg;
         this.speed = speed;
         this.dmgD = dmgD;
-        this.xCoord = 200;
-        this.yCoord = 200;
         this.alive = true;
+        this.spawnx = spawnx;
+        this.spawny = spawny;
 
         try {
             aliveSprite = ImageIO.read(new File(aliveImagePath));
         } catch (IOException e) {
             System.out.println("Failed to load alive sprite: " + e.getMessage());
-        }
-
-        try {
-            deadSprite = ImageIO.read(new File(deadImagePath));
-        } catch (IOException e) {
-            System.out.println("Failed to load dead sprite: " + e.getMessage());
         }
     }
 
@@ -58,9 +55,15 @@ public  class Enemy {
     public double getY() { return yCoord; }
     public int getHp() { return hp; }
     public int getDmg() { return dmg; }
-    public int getSpeed() { return speed; }
+    public double getSpeed() { return speed; }
     public double getDmgD() { return dmgD; }
+    public double getSpawnx(){return spawnx;}
+    public double getSpawny(){return spawny;}
+
 
     public void setX(double x) { xCoord = x; }
     public void setY(double y) { yCoord = y; }
+
+    // Override moveTowardsPlayer for basic movement
+    public abstract void moveTowardsPlayer(Player player);
 }

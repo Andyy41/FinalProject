@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 public class GraphicsPanel extends JPanel implements ActionListener, KeyListener, MouseListener {
@@ -13,7 +14,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private BufferedImage block;
     private Timer timer;
     private Player player;
-   // private Enemy enemy;
+    // private Enemy enemy;
     private boolean[] pressedKeys;
     private double cd;
     private double baseCd = 270;
@@ -25,9 +26,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     int a = 0;
     String direction;
     private ArrayList<Enemy> enemies;
-
-
-
+    private int wave;
+    ArrayList<Point> spawnPoints = new ArrayList<>();
+    double x;
+    double y;// Track the current wave
 
     public GraphicsPanel() {
         timer = new Timer(5, this);
@@ -43,16 +45,64 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        enemies = new ArrayList<>();
-        enemies.add(new CommonEnemy(5,1,1,1,"src\\Enemy.png" , "src\\EnemyDeath.png"));
-
         player = new Player();
+        enemies = new ArrayList<>();
+        wave = 1;
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
         addMouseListener(this);
         setFocusable(true); // this line of code + one below makes this panel active for keylistener events
-        requestFocusInWindow(); // see comment above
+        requestFocusInWindow();
+        spawnEnemies(wave);
     }
+
+    // Spawning enemies outside the map based on wave number
+    private void spawnEnemies(int wave) {
+        Random rand = new Random();
+        int numberOfEnemies = wave * 5; // Increase enemies by 5 each wave
+
+        for (int i = 0; i < numberOfEnemies; i++) {
+            int edge = rand.nextInt(4);
+
+            // Spawn at a random point on one of the edges
+            if (edge == 0) { // Top edge
+                x = rand.nextDouble() * getWidth();
+                y = -50; // Outside the top of the screen
+            } else if (edge == 1) { // Bottom edge
+                x = rand.nextDouble() * getWidth();
+                y = getHeight() + 50; // Outside the bottom of the screen
+            } else if (edge == 2) { // Left edge
+                x = -50; // Outside the left of the screen
+                y = rand.nextDouble() * getHeight();
+            } else { // Right edge
+                x = getWidth() + 50; // Outside the right of the screen
+                y = rand.nextDouble() * getHeight();
+            }
+            // Create a new Point to represent the spawn location
+            Point spawnPoint = new Point((int) x, (int) y);
+
+            // Check if this spawn point is too close to any other spawned enemy
+            boolean tooClose = false;
+            for (Point p : spawnPoints) {
+                if (spawnPoint.distance(p) < 100) { // 100px threshold for distance
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            // If not too close to any other spawn, add to spawnPoints list
+            if (!tooClose) {
+                spawnPoints.add(spawnPoint);
+                // Choose a random type of enemy (Common or Ranged)
+                if (rand.nextBoolean()) {
+                    enemies.add(new CommonEnemy(100, 10, 1, 0.5, spawnPoint.x, spawnPoint.y, "src/Enemy.png"));
+                } else {
+                    enemies.add(new RangedEnemy(80, 12, 1, 1.0, x, y, "src/RangedEnemy.png"));
+                }
+            }
+        }
+    }
+
 
     // Check if the player is moving (by checking movement keys)
     private boolean isMoving() {
@@ -64,41 +114,47 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         return x;
     }
 
-    private boolean isDiagonalU(){
+    private boolean isDiagonalU() {
         boolean c = pressedKeys[KeyEvent.VK_W] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
         //System.out.println("IS DU");
         return c;
     }
-    private boolean isDiagonalD(){
+
+    private boolean isDiagonalD() {
         boolean r = pressedKeys[KeyEvent.VK_S] && (pressedKeys[KeyEvent.VK_A] || pressedKeys[KeyEvent.VK_D]);
         //System.out.println("IS DD");
         return r;
     }
 
-    private boolean isUP(){
+    private boolean isUP() {
         boolean w = pressedKeys[KeyEvent.VK_W];
         //System.out.println("IS UP");
         return w;
     }
 
-    private boolean isDown(){
+    private boolean isDown() {
         boolean s = pressedKeys[KeyEvent.VK_S];
         //System.out.println("IS DOWN");
         return s;
     }
 
-    private boolean isRight(){
+    private boolean isRight() {
         boolean d = pressedKeys[KeyEvent.VK_D];
         //System.out.println("IS RIGHT");
         return d;
     }
 
-    private boolean isLeft(){
+    private boolean isLeft() {
         boolean a = pressedKeys[KeyEvent.VK_A];
         //System.out.println("IS LEFT");
         return a;
     }
 
+    private boolean isRolled() {
+        boolean roll = pressedKeys[KeyEvent.VK_SPACE];
+        System.out.println("isRolled");
+        return roll;
+    }
 
 
     @Override
@@ -106,69 +162,12 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        if (a == 0) {
-            player.resetB();
+        if (cd == 0 && isRolled()) {
+            cd = 120;
+           g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
-        if (rolled) {
-            if (direction.equals("down")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right, left,up,true), (int) player.getxCoord(), (int) player.getyCoord(), null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            } else if (direction.equals("upr")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            } else if (direction.equals("up")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, right,left,true,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            } else if (direction.equals("right")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), null);
-                    a++;
-                } else {
-                    rolled = false;}
-            } else if (direction.equals("left")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, false, true, false,true,false,false), (int) player.getxCoord(), (int) player.getyCoord(), -16, 15, null);
-                    a++;
-                } else {
-                    rolled = false;}
-            } else if (direction.equals("upl")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord() + 13, (int) player.getyCoord() + 7, -16, 15, null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            } else if (direction.equals("dr")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, true, false, true, true,left,up,down), (int) player.getxCoord(), (int) player.getyCoord(), 16, -15,  null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            } else if (direction.equals("dl")) {
-                if (a < 85) {
-                    g.drawImage(player.getPlayerImage(false, false, true, true, false,true,up,down), (int) player.getxCoord(), (int) player.getyCoord(), -16, 15, null);
-                    a++;
-                } else {
-                    rolled = false;
-                }
-            }
-        }
-        if (!rolled) {
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false , isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), false ,isRight() , isLeft(), isUP(),isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        if (cd > 0){
+            cd--;
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -178,6 +177,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         g.setColor(Color.white);
         g.drawString("Cooldowns", 50, 30);
         g.drawString("HP:" + player.GetHP(), 50, 60);
+        g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+        g.setColor(Color.white);
+        g.drawString("Wave: " + wave, 50, 80);
+        player.updateFlashing();
         if (player.isInvincible()) {
             long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
             if (elapsed >= player.getInvincibilityDuration()) {
@@ -186,19 +189,45 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
 
         for (Enemy enemy : enemies) {
-            g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
+            // Move enemies towards the player
+            enemy.moveTowardsPlayer(player);
 
-            if (player.playerRect().intersects(enemy.getBoundingBox())) {
-                player.Hit((CommonEnemy) enemy);  // You must have this method in Player class
+            // Draw enemy
+            g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
+        }
+        for (Enemy enemy : enemies) {
+            // Only process collisions if the player is not invincible
+            if (!player.isInvincible() && player.playerRect().intersects(enemy.getBoundingBox())) {
+                player.Hit(enemy);
+            }
+
+            // Remove enemy if its HP is 0 or less
+            if (enemy.getHp() <= 0 || player.playerRect().intersects(enemy.getBoundingBox())) {
+                enemies.remove(enemy);  // Remove the enemy from the list
+                break;  // Exit the loop as the list is modified during iteration
             }
         }
 
+
+        checkWaveCompletion();
         if (player.isInvincible() && (System.currentTimeMillis() / 100) % 2 == 0) {
-            // Draw nothing or transparent to simulate flashing
-        } else {
-            g.drawImage(player.getPlayerImage(...), ...);
+            g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
 
+        if (player.isFlashing()) {
+            g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        } else {
+            // Draw the player as normal if not flashing
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+        }
+
+        if (player.isInvincible()) {
+            long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
+            if (elapsed >= player.getInvincibilityDuration()) {
+                player.setInvincible(false);
+                player.updateFlashing();  // Reset flashing when invincibility ends
+            }
+        }
 
 
         // draw score
@@ -227,87 +256,25 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (pressedKeys[83]) {
             player.moveDown();
         }
-
-        if (cd == 0) {
-            if (pressedKeys[65] && pressedKeys[67]) {
-                direction = "left";
-                a = 0;
-                rolled = true;
-                player.roll(direction);
-                cd = baseCd;
-            }
-
-            if (pressedKeys[68] && pressedKeys[67]) {
-                direction = "right";
-                a = 0;
-                rolled = true;
-                player.roll(direction);
-                cd = baseCd;
-            }
-
-            if (pressedKeys[87] && pressedKeys[67]) {
-                if (pressedKeys[68]) {
-                    direction = "upr";
-                    a = 0;
-                    rolled = true;
-                    player.roll("up");
-                    player.roll("right");
-                    cd = baseCd;
-                } else if (pressedKeys[65]) {
-                    direction = "upl";
-                    a = 0;
-                    rolled = true;
-                    player.roll("up");
-                    player.roll("left");
-                    cd = baseCd;
-                } else {
-                    direction = "up";
-                    a = 0;
-                    rolled = true;
-                    player.roll(direction);
-                    cd = baseCd;
-                }
-            }
-
-            if (pressedKeys[67]) {
-                if (pressedKeys[83]) {
-                    System.out.println("ahgajhg");
-                    if (pressedKeys[68]) {
-                        System.out.println("test");
-                        direction = "dr";
-                        a = 0;
-                        rolled = true;
-                        player.roll("down");
-                        player.roll("right");
-                        cd = baseCd;
-                    } else if (pressedKeys[65]) {
-                        System.out.println("a");
-                        direction = "dl";
-                        a = 0;
-                        rolled = true;
-                        player.roll("down");
-                        player.roll("left");
-                        cd = baseCd;
-                    } else {
-                        System.out.println("r");
-                        direction = "down";
-                        a = 0;
-                        rolled = true;
-                        player.roll(direction);
-                        cd = baseCd;
-                    }
-                }
-                System.out.println("ghagghagskhgkahgk");
-            }
-        }
-        if (cd > 0) {
-            cd--;
-        }
     }
 
-  //  public ArrayList<Integer> Keys(){
-  //      while (isMoving())
-  //  }
+    private void checkWaveCompletion() {
+        // Check if all enemies are dead
+        boolean allEnemiesDead = true;
+        for (Enemy enemy : enemies) {
+            if (!enemy.isDead()) {
+                allEnemiesDead = false;
+                break;
+            }
+        }
+
+        // If all enemies are dead, progress to the next wave
+        if (allEnemiesDead) {
+            wave++; // Increase wave
+            enemies.clear(); // Clear current enemies
+            spawnEnemies(wave); // Spawn new enemies for the next wave
+        }
+    }
 
     // ActionListener interface method
     @Override
