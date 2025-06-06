@@ -16,7 +16,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private Player player;
     // private Enemy enemy;
     private boolean[] pressedKeys;
-    private double cd;
     private double baseCd = 270;
     boolean rolled;
     boolean right;
@@ -34,7 +33,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     public GraphicsPanel() {
         timer = new Timer(5, this);
         timer.start();
-        cd = 0;
         try {
             background = ImageIO.read(new File("src/background.png"));
         } catch (IOException e) {
@@ -151,6 +149,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     }
 
     private boolean isRolled() {
+        baseCd = 0;
         boolean roll = pressedKeys[KeyEvent.VK_SPACE];
         System.out.println("isRolled");
         return roll;
@@ -162,17 +161,16 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         super.paintComponent(g);
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        if (cd == 0 && isRolled()) {
-            cd = 120;
-           g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        }
-        if (cd > 0){
-            cd--;
+        if (baseCd == 0 && isRolled()) {
+           g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown() , baseCd), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            if (baseCd > 0){
+                baseCd--;
+            }
         }
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
-        g.drawString(Double.toString(cd), 50, 50);
+        g.drawString(Double.toString(baseCd), 50, 50);
         g.setFont(new Font("Times New Roman", Font.BOLD, 22));
         g.setColor(Color.white);
         g.drawString("Cooldowns", 50, 30);
@@ -218,7 +216,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
         } else {
             // Draw the player as normal if not flashing
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown(), baseCd), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
 
         if (player.isInvincible()) {
@@ -323,6 +321,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
     }
 
+    public double getCD(){
+        return baseCd;
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) { } // unimplemented

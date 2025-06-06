@@ -297,8 +297,8 @@ public class Player {
 
 
 
-    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown) {
-        if (roll) {
+    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown , double rollCd) {
+        if (rollCd ==0 && roll) {
             if (isDiagonalU && facingRight) {
                 if (yCoord - 5 >= 0 && xCoord <= 920) {
                     yCoord -= 5;
@@ -369,8 +369,8 @@ public class Player {
 
         // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true, false, false, false, false, false, false, false).getHeight();
-        int imageWidth = getPlayerImage(true, false, false, false, false, false,false,false).getWidth();
+        int imageHeight = getPlayerImage(true, false, false, false, false, false, false, false , rollCd).getHeight();
+        int imageWidth = getPlayerImage(true, false, false, false, false, false,false,false, rollCd).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
     }
