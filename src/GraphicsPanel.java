@@ -29,6 +29,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     ArrayList<Point> spawnPoints = new ArrayList<>();
     double x;
     double y;// Track the current wave
+    private boolean canRoll;private long lastRollTime = 0;
+    private final long ROLL_COOLDOWN = 1000; // 1 second cooldown
+
+
 
     public GraphicsPanel() {
         timer = new Timer(5, this);
@@ -149,9 +153,11 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     }
 
     private boolean isRolled() {
-        baseCd = 0;
-        boolean roll = pressedKeys[KeyEvent.VK_SPACE];
-        System.out.println("isRolled");
+        boolean roll = pressedKeys[KeyEvent.VK_SPACE] && canRoll;
+        if (roll) {
+            canRoll = false; // prevent rolling until cooldown is done
+            baseCd = 270; // reset cooldown
+        }
         return roll;
     }
 
@@ -159,14 +165,19 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        player.update();
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
-        if (baseCd == 0 && isRolled()) {
-           g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown() , baseCd), (int) player.getxCoord(), (int) player.getyCoord(), null);
-            if (baseCd > 0){
-                baseCd--;
-            }
+        // Update cooldown
+        if (baseCd > 0) {
+            baseCd -= 0.5; // decrease cooldown over time
+        } else {
+            baseCd = 0;
+            canRoll = true; // allow rolling when cooldown reaches 0
         }
+
+        // Draw player based on state
+        g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
@@ -216,7 +227,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
         } else {
             // Draw the player as normal if not flashing
-            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRolled(), isRight(), isLeft(), isUP(), isDown(), baseCd), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         }
 
         if (player.isInvincible()) {
@@ -254,6 +265,10 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (pressedKeys[83]) {
             player.moveDown();
         }
+
+        if(pressedKeys[32]){
+            rolled = true;
+        }
     }
 
     private void checkWaveCompletion() {
@@ -289,11 +304,27 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // see this for all keycodes: https://stackoverflow.com/questions/15313469/java-keyboard-keycodes-list
-        // A = 65, D = 68, S = 83, W = 87, left = 37, up = 38, right = 39, down = 40, space = 32, enter = 10
         int key = e.getKeyCode();
         pressedKeys[key] = true;
+
+        if (key == KeyEvent.VK_SPACE && !player.isRolling()) {
+            long now = System.currentTimeMillis();
+            if (now - lastRollTime >= ROLL_COOLDOWN) {
+                double dx = 0;
+                double dy = 0;
+                if (pressedKeys[KeyEvent.VK_W]) dy -= 5;
+                if (pressedKeys[KeyEvent.VK_S]) dy += 5;
+                if (pressedKeys[KeyEvent.VK_A]) dx -= 5;
+                if (pressedKeys[KeyEvent.VK_D]) dx += 5;
+
+                if (dx != 0 || dy != 0) {
+                    lastRollTime = now;
+                    player.startRoll(dx, dy);
+                }
+            }
+        }
     }
+
 
 
     @Override

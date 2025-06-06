@@ -36,7 +36,13 @@ public class Player {
     private BufferedImage hitIFRAME;
     private boolean isFlashing = false; // Flag to toggle visibility
     private long lastFlashTime = 0; // Store the time of the last flash toggle
-    private final long flashDuration = 500; // Flash every 150 ms (adjust as needed)
+    private final long flashDuration = 500;// Flash every 150 ms (adjust as needed)
+    private final long RollDuration = 250;
+    private boolean isRolling = false;
+    private long rollStartTime;
+    private double rollDx = 0;
+    private double rollDy = 0;
+
 
     public Player() {
         HP = 100;
@@ -297,80 +303,66 @@ public class Player {
 
 
 
-    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown , double rollCd) {
-        if (rollCd ==0 && roll) {
-            if (isDiagonalU && facingRight) {
-                if (yCoord - 5 >= 0 && xCoord <= 920) {
-                    yCoord -= 5;
-                    xCoord += 5;
-                }
-                return diagRoll.getActiveFrame();
-            } else if (isDiagonalU && facingLeft) {
-                if (yCoord - 5 >= 0 && xCoord - 5 >= 0) {
-                    yCoord -= 5;
-                    xCoord -= 5;
-                }
-                return diagRoll.getActiveFrame();
-            } else if (isDiagonalD && facingRight) {
-                if (yCoord + 5 <= 435 && xCoord + 5 <= 920) {
-                    yCoord += 5;
-                    xCoord += 5;
-                }
-                return diagRollDown.getActiveFrame();
-            } else if (isDiagonalD && facingLeft) {
-                if (yCoord + 5 <= 435 && xCoord - 5 >= 0) {
-                    yCoord += 5;
-                    xCoord -= 5;
-                }
-                return diagRollDown.getActiveFrame();
-            } else if (facingDown) {
-                if (yCoord + 5 <= 435) {
-                    yCoord += 5;
-                }
-                return frontRoll.getActiveFrame();
-            } else if (facingRight) {
-                if (xCoord + 5 <= 920) {
-                    xCoord += 5;
-                }
-                return rollAnimation.getActiveFrame();
-            } else if (facingLeft) {
-                if (xCoord - 5 >= 0)
-                xCoord -= 5;
-                return rollAnimation.getActiveFrame();
-            } else if (facingUp) {
-                if (yCoord - 5 >= 0)
-                yCoord -= 5;
-                return upRoll.getActiveFrame();
-            }
+    public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD,
+                                        boolean facingRight, boolean facingLeft,
+                                        boolean facingUp, boolean facingDown) {
+        if (isRolling) {
+            if (isDiagonalU && facingRight) return diagRoll.getActiveFrame();
+            else if (isDiagonalU && facingLeft) return diagRoll.getActiveFrame();
+            else if (isDiagonalD && facingRight) return diagRollDown.getActiveFrame();
+            else if (isDiagonalD && facingLeft) return diagRollDown.getActiveFrame();
+            else if (facingDown) return frontRoll.getActiveFrame();
+            else if (facingRight) return rollAnimation.getActiveFrame();
+            else if(facingLeft) return rollAnimation.getActiveFrame();
+            else if (facingUp) return upRoll.getActiveFrame();
+
             return rollAnimation.getActiveFrame();
         }
-            if (isMoving) {
-                if (isDiagonalU && facingRight) {
-                    return DUR.getActiveFrame();
-                } else if (isDiagonalU) {
-                    return DUL.getActiveFrame();
-                } else if (isDiagonalD && facingRight) {
-                    return DDR.getActiveFrame(); // DDR
-                } else if (isDiagonalD) {
-                    return DDL.getActiveFrame(); // DDL
-                } else if (facingUp) {
-                    return UP.getActiveFrame();
-                } else if (facingDown) {
-                    return animation.getActiveFrame();
-                } else if (facingRight) {
-                    return RIGHT.getActiveFrame(); // WR
-                } else if (facingLeft)
-                    return LEFT.getActiveFrame(); // WL
-            }
+
+        if (isMoving) {
+            if (isDiagonalU && facingRight) return DUR.getActiveFrame();
+            else if (isDiagonalU) return DUL.getActiveFrame();
+            else if (isDiagonalD && facingRight) return DDR.getActiveFrame();
+            else if (isDiagonalD) return DDL.getActiveFrame();
+            else if (facingUp) return UP.getActiveFrame();
+            else if (facingDown) return animation.getActiveFrame();
+            else if (facingRight) return RIGHT.getActiveFrame();
+            else if (facingLeft) return LEFT.getActiveFrame();
+        }
+
         return idleAnimation.getActiveFrame();
     }
 
+    public boolean isRolling() {
+        return isRolling;
+    }
+
+    public void startRoll(double dx,double dy) {
+        isRolling = true;
+        rollStartTime = System.currentTimeMillis();
+        rollDx = dx;
+        rollDy = dy;
+    }
+    public void update() {
+        if (isRolling) {
+            long elapsed = System.currentTimeMillis() - rollStartTime;
+            if (elapsed >= RollDuration) {
+                isRolling = false;
+                rollDx = 0;
+                rollDy = 0;
+            } else {
+                // Move once per frame
+                xCoord = Math.max(0, Math.min(920, xCoord + rollDx));
+                yCoord = Math.max(0, Math.min(435, yCoord + rollDy));
+            }
+        }
+    }
 
 
-        // We use a "bounding Rectangle" for detecting collision
+    // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
-        int imageHeight = getPlayerImage(true, false, false, false, false, false, false, false , rollCd).getHeight();
-        int imageWidth = getPlayerImage(true, false, false, false, false, false,false,false, rollCd).getWidth();
+        int imageHeight = getPlayerImage(true, false, false, false, false, false, false).getHeight();
+        int imageWidth = getPlayerImage(true, false, false, false, false, false,false).getWidth();
         Rectangle rect = new Rectangle((int) xCoord, (int) yCoord, imageWidth, imageHeight);
         return rect;
     }
