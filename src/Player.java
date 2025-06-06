@@ -299,39 +299,48 @@ public class Player {
 
     public BufferedImage getPlayerImage(boolean isMoving, boolean isDiagonalU, boolean isDiagonalD, boolean roll, boolean facingRight,boolean facingLeft , boolean facingUp , boolean facingDown) {
         if (roll) {
-            if (facingUp) {
-                yCoord -= 5;
-                return upRoll.getActiveFrame();
-            }
-            else if (isDiagonalU && facingRight) {
-                yCoord += 5;
-                xCoord += 5;
+            if (isDiagonalU && facingRight) {
+                if (yCoord - 5 >= 0 && xCoord <= 920) {
+                    yCoord -= 5;
+                    xCoord += 5;
+                }
                 return diagRoll.getActiveFrame();
-            }
-            else if(isDiagonalU && facingLeft){
-                    yCoord+= 5;
+            } else if (isDiagonalU && facingLeft) {
+                if (yCoord - 5 >= 0 && xCoord - 5 >= 0) {
+                    yCoord -= 5;
                     xCoord -= 5;
-                    return diagRoll.getActiveFrame();
-            }
-            else if (isDiagonalD && facingRight) {
-                yCoord += 5;
-                xCoord += 5;
+                }
+                return diagRoll.getActiveFrame();
+            } else if (isDiagonalD && facingRight) {
+                if (yCoord + 5 <= 435 && xCoord + 5 <= 920) {
+                    yCoord += 5;
+                    xCoord += 5;
+                }
                 return diagRollDown.getActiveFrame();
-            }
-            else if(isDiagonalD && facingLeft){
-                yCoord +=5;
-                xCoord -= 5;
-                return  diagRollDown.getActiveFrame();
-            }
-            else if (facingDown) {
-                yCoord += 5;
+            } else if (isDiagonalD && facingLeft) {
+                if (yCoord + 5 <= 435 && xCoord - 5 >= 0) {
+                    yCoord += 5;
+                    xCoord -= 5;
+                }
+                return diagRollDown.getActiveFrame();
+            } else if (facingDown) {
+                if (yCoord + 5 <= 435) {
+                    yCoord += 5;
+                }
                 return frontRoll.getActiveFrame();
             } else if (facingRight) {
-                xCoord += 5;
+                if (xCoord + 5 <= 920) {
+                    xCoord += 5;
+                }
                 return rollAnimation.getActiveFrame();
             } else if (facingLeft) {
+                if (xCoord - 5 >= 0)
                 xCoord -= 5;
                 return rollAnimation.getActiveFrame();
+            } else if (facingUp) {
+                if (yCoord - 5 >= 0)
+                yCoord -= 5;
+                return upRoll.getActiveFrame();
             }
             return rollAnimation.getActiveFrame();
         }
