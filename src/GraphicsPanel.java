@@ -14,9 +14,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private BufferedImage block;
     private Timer timer;
     private Player player;
-    // private Enemy enemy;
     private boolean[] pressedKeys;
-    private double baseCd = 270;
     boolean rolled;
     boolean right;
     boolean left;
@@ -29,14 +27,16 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     ArrayList<Point> spawnPoints = new ArrayList<>();
     double x;
     double y;// Track the current wave
-    private boolean canRoll;private long lastRollTime = 0;
-    private final long ROLL_COOLDOWN = 1000; // 1 second cooldown
-
+    private boolean canRoll;
+    private final long ROLL_COOLDOWN = 1000; // 1 second
+    private long lastRollTime = 0; // when roll started
+    private ArrayList<PlayerProjectile> projectiles = new ArrayList<>();
+    private String bulletImage;
+    private ArrayList<EnemyProjectile> enemyProjectiles = new ArrayList<>();
+    private String enemyBullet;
 
 
     public GraphicsPanel() {
-        timer = new Timer(5, this);
-        timer.start();
         try {
             background = ImageIO.read(new File("src/background.png"));
         } catch (IOException e) {
@@ -56,6 +56,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         setFocusable(true); // this line of code + one below makes this panel active for keylistener events
         requestFocusInWindow();
         spawnEnemies(wave);
+        timer = new Timer(10, this);
+        timer.start();
     }
 
     // Spawning enemies outside the map based on wave number
@@ -97,9 +99,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
                 spawnPoints.add(spawnPoint);
                 // Choose a random type of enemy (Common or Ranged)
                 if (rand.nextBoolean()) {
-                    enemies.add(new CommonEnemy(100, 10, 1, 0.5, spawnPoint.x, spawnPoint.y, "src/Enemy.png"));
+                    enemies.add(new CommonEnemy(100, 10, 2, 0.5, spawnPoint.x, spawnPoint.y, "src/Enemy.png"));
                 } else {
-                    enemies.add(new RangedEnemy(80, 12, 1, 1.0, x, y, "src/RangedEnemy.png"));
+                    enemies.add(new RangedEnemy(70, 20, 1, 1.0, spawnPoint.x, spawnPoint.y, "src/RangedEnemy.png"));
                 }
             }
         }
@@ -156,7 +158,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         boolean roll = pressedKeys[KeyEvent.VK_SPACE] && canRoll;
         if (roll) {
             canRoll = false; // prevent rolling until cooldown is done
-            baseCd = 270; // reset cooldown
         }
         return roll;
     }
@@ -169,22 +170,19 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         // the order that things get "painted" matter; we paint the background first
         g.drawImage(background, 0, 0, null);
         // Update cooldown
-        if (baseCd > 0) {
-            baseCd -= 0.5; // decrease cooldown over time
-        } else {
-            baseCd = 0;
-            canRoll = true; // allow rolling when cooldown reaches 0
-        }
+        long now = System.currentTimeMillis();
+        long cooldownRemaining = Math.max(0, ROLL_COOLDOWN - (now - lastRollTime));
 
         // Draw player based on state
         g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
         g.drawImage(block, 50, 10, null);
         g.setFont(new Font("Arial", Font.ITALIC, 14));
         g.setColor(Color.red);
-        g.drawString(Double.toString(baseCd), 50, 50);
         g.setFont(new Font("Times New Roman", Font.BOLD, 22));
         g.setColor(Color.white);
-        g.drawString("Cooldowns", 50, 30);
+        g.setFont(new Font("Arial", Font.ITALIC, 14));
+        g.setColor(Color.red);
+        g.drawString("Roll CD: " + (cooldownRemaining / 1000.0) + "s", 50, 20);
         g.drawString("HP:" + player.GetHP(), 50, 60);
         g.setFont(new Font("Times New Roman", Font.BOLD, 22));
         g.setColor(Color.white);
@@ -198,11 +196,24 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         }
 
         for (Enemy enemy : enemies) {
-            // Move enemies towards the player
-            enemy.moveTowardsPlayer(player);
-
             // Draw enemy
             g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
+            // Update and draw enemy projectiles
+            for (int i = 0; i < enemyProjectiles.size(); i++) {
+                EnemyProjectile ep = enemyProjectiles.get(i);
+                ep.update();
+                ep.draw(g);
+                if (ep.isOffScreen(getWidth(), getHeight())) {
+                    enemyProjectiles.remove(i);
+                    i--;
+                } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
+                    player.Hit(enemy);  // Or some damage logic
+                    enemyProjectiles.remove(i);
+                    i--;
+                }
+            }
+
+
         }
         for (Enemy enemy : enemies) {
             // Only process collisions if the player is not invincible
@@ -214,6 +225,28 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             if (enemy.getHp() <= 0 || player.playerRect().intersects(enemy.getBoundingBox())) {
                 enemies.remove(enemy);  // Remove the enemy from the list
                 break;  // Exit the loop as the list is modified during iteration
+            }
+        }
+
+
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy enemy = enemies.get(i);
+
+            // Check collisions with projectiles
+            for (int j = 0; j < projectiles.size(); j++) {
+                PlayerProjectile p = projectiles.get(j);
+                if (enemy.getBoundingBox().intersects(p.getBounds())) {
+                    enemy.decreaseHp(10); // or however much
+                    projectiles.remove(j);
+                    j--;
+                    break;
+                }
+            }
+
+            // Remove dead enemies
+            if (enemy.getHp() <= 0) {
+                enemies.remove(i);
+                i--;
             }
         }
 
@@ -266,8 +299,18 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             player.moveDown();
         }
 
-        if(pressedKeys[32]){
+        if (pressedKeys[32]) {
             rolled = true;
+        }
+        // Update and draw projectiles
+        for (int i = 0; i < projectiles.size(); i++) {
+            PlayerProjectile p = projectiles.get(i);
+            p.update();
+            p.draw(g);
+            if (p.isOffScreen(getWidth(), getHeight())) {
+                projectiles.remove(i);
+                i--;
+            }
         }
     }
 
@@ -292,14 +335,42 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     // ActionListener interface method
     @Override
     public void actionPerformed(ActionEvent e) {
-        // repaints the window every 10ms
-        repaint();
+        if (enemies != null) {
+            for (Enemy enemy : enemies) {
+                enemy.moveTowardsPlayer(player);
+
+                if (enemy instanceof RangedEnemy ranged) {
+                    ranged.resetShotFlag();
+                    // Check only once per enemy per tick
+                    if (ranged.canShoot()) {
+                        enemyProjectiles.add(ranged.shootAt(player, "src\\EnemyBullet.png"));
+                    }
+                }
+            }
+
+            // update enemy projectiles (same)
+            for (int i = 0; i < enemyProjectiles.size(); i++) {
+                EnemyProjectile ep = enemyProjectiles.get(i);
+                ep.update();
+                if (ep.isOffScreen(getWidth(), getHeight())) {
+                    enemyProjectiles.remove(i);
+                    i--;
+                } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
+                    player.Hit(null);
+                    enemyProjectiles.remove(i);
+                    i--;
+                }
+            }
+            repaint();
+        }
     }
+
 
 
     // KeyListener interface methods
     @Override
-    public void keyTyped(KeyEvent e) { } // unimplemented
+    public void keyTyped(KeyEvent e) {
+    } // unimplemented
 
 
     @Override
@@ -326,7 +397,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     }
 
 
-
     @Override
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
@@ -336,26 +406,30 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     // MouseListener interface methods
     @Override
-    public void mouseClicked(MouseEvent e) { }  // unimplemented because
+    public void mouseClicked(MouseEvent e) {
+    }  // unimplemented because
     // if you move your mouse while clicking, this method isn't
     // called, so mouseReleased is best
 
 
     @Override
-    public void mousePressed(MouseEvent e) { } // unimplemented
+    public void mousePressed(MouseEvent e) {
+    } // unimplemented
 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {  // left mouse click
-            Point mouseClickLocation = e.getPoint();
+        if (e.getButton() == MouseEvent.BUTTON1) {  // Left click
+            double playerX = player.getxCoord();
+            double playerY = player.getyCoord();
+            double targetX = e.getX();
+            double targetY = e.getY();
+
+            // Center projectile on player
+            PlayerProjectile p = new PlayerProjectile(playerX + 16, playerY + 16, targetX, targetY, 5, "src\\PlayerBullet.png");
+            projectiles.add(p);
         }
     }
-
-    public double getCD(){
-        return baseCd;
-    }
-
     @Override
     public void mouseEntered(MouseEvent e) { } // unimplemented
 

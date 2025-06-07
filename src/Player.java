@@ -242,7 +242,8 @@ public class Player {
 
     public void Hit(Enemy enemy) {
         if (!invincible) {
-            HP -= enemy.getDmg();
+            int damage = (enemy != null) ? enemy.getDmg() : 10; // default or projectile damage
+            HP -= damage;
             invincible = true;
             invincibleStartTime = System.currentTimeMillis();
             updateFlashing();
@@ -345,6 +346,7 @@ public class Player {
     }
     public void update() {
         if (isRolling) {
+            invincible = true;
             long elapsed = System.currentTimeMillis() - rollStartTime;
             if (elapsed >= RollDuration) {
                 isRolling = false;
@@ -358,7 +360,9 @@ public class Player {
         }
     }
 
-
+public double getRolltime(){
+        return rollStartTime;
+}
     // We use a "bounding Rectangle" for detecting collision
     public Rectangle playerRect() {
         int imageHeight = getPlayerImage(true, false, false, false, false, false, false).getHeight();

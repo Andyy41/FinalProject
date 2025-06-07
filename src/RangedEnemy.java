@@ -1,6 +1,10 @@
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 public class RangedEnemy extends Enemy {
+    private long lastShotTime = 0;
+    private long shootCooldown = 250 + new Random().nextInt(251); // 250–500 ms
+    private boolean hasShotThisTick = false;
 
     // Constructor for RangedEnemy
     public RangedEnemy(int hp, int dmg, double speed, double dmgD,double spawnx , double spawny , String aliveImagePath) {
@@ -24,8 +28,25 @@ public class RangedEnemy extends Enemy {
             xCoord += dx * speed;
             yCoord += dy * speed;
         }
-
-        // If it's close enough, it could stop and attack
-        // This could be expanded with a shooting mechanism (range attack)
     }
-}
+
+        public EnemyProjectile shootAt(Player player, String projectileImage) {
+            return new EnemyProjectile(xCoord + 16, yCoord + 16, player.getxCoord(), player.getyCoord(), projectileImage);
+        }
+
+    public boolean canShoot() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastShotTime >= shootCooldown) {
+            lastShotTime = currentTime;
+            // Randomize next cooldown
+            shootCooldown = 2000 + new Random().nextInt(51); // 250–500 ms
+            System.out.println("Enemy at (" + xCoord + ", " + yCoord + ") fired a bullet!");
+            return true;
+        }
+        return false;
+    }
+
+    public void resetShotFlag() {
+        hasShotThisTick = false;
+    }
+    }
