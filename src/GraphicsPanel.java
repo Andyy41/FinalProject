@@ -6,12 +6,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
+import javax.swing.JButton;
 
 
 public class GraphicsPanel extends JPanel implements ActionListener, KeyListener, MouseListener {
     private BufferedImage background;
     private BufferedImage block;
+    private BufferedImage Black;
     private Timer timer;
     private Player player;
     private boolean[] pressedKeys;
@@ -34,11 +37,13 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private String bulletImage;
     private ArrayList<EnemyProjectile> enemyProjectiles = new ArrayList<>();
     private String enemyBullet;
+    private JButton Start;
+    private boolean begin;
 
 
     public GraphicsPanel() {
         try {
-            background = ImageIO.read(new File("src/background.png"));
+            background = ImageIO.read(new File("src/Room.png"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -47,9 +52,16 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        try {
+            Black = ImageIO.read(new File("src/Black.png"));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        Start = new JButton("Play");
         player = new Player();
         enemies = new ArrayList<>();
         wave = 1;
+        begin = false;
         pressedKeys = new boolean[128]; // 128 keys on keyboard, max keycode is 127
         addKeyListener(this);
         addMouseListener(this);
@@ -58,6 +70,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         spawnEnemies(wave);
         timer = new Timer(10, this);
         timer.start();
+        add(Start);
     }
 
     // Spawning enemies outside the map based on wave number
@@ -168,149 +181,167 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         super.paintComponent(g);
         player.update();
         // the order that things get "painted" matter; we paint the background first
-        g.drawImage(background, 0, 0, null);
+
         // Update cooldown
         long now = System.currentTimeMillis();
         long cooldownRemaining = Math.max(0, ROLL_COOLDOWN - (now - lastRollTime));
 
+        if (!begin) {
+            g.drawImage(Black, 0, 0, null);
+            Start.addActionListener(this);
+            Start.setLocation(0, 0);
+        }
+
         // Draw player based on state
-        g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        g.drawImage(block, 50, 10, null);
-        g.setFont(new Font("Arial", Font.ITALIC, 14));
-        g.setColor(Color.red);
-        g.setFont(new Font("Times New Roman", Font.BOLD, 22));
-        g.setColor(Color.white);
-        g.setFont(new Font("Arial", Font.ITALIC, 14));
-        g.setColor(Color.red);
-        g.drawString("Roll CD: " + (cooldownRemaining / 1000.0) + "s", 50, 20);
-        g.drawString("HP:" + player.GetHP(), 50, 60);
-        g.setFont(new Font("Times New Roman", Font.BOLD, 22));
-        g.setColor(Color.white);
-        g.drawString("Wave: " + wave, 50, 80);
-        player.updateFlashing();
-        if (player.isInvincible()) {
-            long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
-            if (elapsed >= player.getInvincibilityDuration()) {
-                player.setInvincible(false);
-            }
-        }
-
-        for (Enemy enemy : enemies) {
-            // Draw enemy
-            g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
-            // Update and draw enemy projectiles
-            for (int i = 0; i < enemyProjectiles.size(); i++) {
-                EnemyProjectile ep = enemyProjectiles.get(i);
-                ep.update();
-                ep.draw(g);
-                if (ep.isOffScreen(getWidth(), getHeight())) {
-                    enemyProjectiles.remove(i);
-                    i--;
-                } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
-                    player.Hit(enemy);  // Or some damage logic
-                    enemyProjectiles.remove(i);
-                    i--;
-                }
-            }
-
-
-        }
-        for (Enemy enemy : enemies) {
-            // Only process collisions if the player is not invincible
-            if (!player.isInvincible() && player.playerRect().intersects(enemy.getBoundingBox())) {
-                player.Hit(enemy);
-            }
-
-            // Remove enemy if its HP is 0 or less
-            if (enemy.getHp() <= 0 || player.playerRect().intersects(enemy.getBoundingBox())) {
-                enemies.remove(enemy);  // Remove the enemy from the list
-                break;  // Exit the loop as the list is modified during iteration
-            }
-        }
-
-
-        for (int i = 0; i < enemies.size(); i++) {
-            Enemy enemy = enemies.get(i);
-
-            // Check collisions with projectiles
-            for (int j = 0; j < projectiles.size(); j++) {
-                PlayerProjectile p = projectiles.get(j);
-                if (enemy.getBoundingBox().intersects(p.getBounds())) {
-                    enemy.decreaseHp(10); // or however much
-                    projectiles.remove(j);
-                    j--;
-                    break;
-                }
-            }
-
-            // Remove dead enemies
-            if (enemy.getHp() <= 0) {
-                enemies.remove(i);
-                i--;
-            }
-        }
-
-
-        checkWaveCompletion();
-        if (player.isInvincible() && (System.currentTimeMillis() / 100) % 2 == 0) {
-            g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        }
-
-        if (player.isFlashing()) {
-            g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        } else {
-            // Draw the player as normal if not flashing
+        if (!(player.getHP() <= 0) && begin) {
+            remove(Start);
+            g.drawImage(background, 0, 0, null);
             g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
-        }
+            g.drawImage(block, 50, 10, null);
+            g.setFont(new Font("Arial", Font.ITALIC, 14));
+            g.setColor(Color.red);
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial", Font.ITALIC, 14));
+            g.setColor(Color.red);
+            g.drawString("Roll CD: " + (cooldownRemaining / 1000.0) + "s", 50, 20);
+            g.drawString("HP:" + player.GetHP(), 50, 60);
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            g.setColor(Color.white);
+            g.drawString("Wave: " + wave, 50, 80);
+            player.updateFlashing();
+            if (player.isInvincible()) {
+                long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
+                if (elapsed >= player.getInvincibilityDuration()) {
+                    player.setInvincible(false);
+                }
+            }
 
-        if (player.isInvincible()) {
-            long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
-            if (elapsed >= player.getInvincibilityDuration()) {
-                player.setInvincible(false);
-                player.updateFlashing();  // Reset flashing when invincibility ends
+            for (Enemy enemy : enemies) {
+                // Draw enemy
+                g.drawImage(enemy.getCurrentImage(), (int) enemy.getX(), (int) enemy.getY(), null);
+                // Update and draw enemy projectiles
+                for (int i = 0; i < enemyProjectiles.size(); i++) {
+                    EnemyProjectile ep = enemyProjectiles.get(i);
+                    ep.update();
+                    ep.draw(g);
+                    if (ep.isOffScreen(getWidth(), getHeight())) {
+                        enemyProjectiles.remove(i);
+                        i--;
+                    } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
+                        player.Hit(enemy);  // Or some damage logic
+                        enemyProjectiles.remove(i);
+                        i--;
+                    }
+                }
+
+
+            }
+            for (Enemy enemy : enemies) {
+                // Only process collisions if the player is not invincible
+                if (!player.isInvincible() && player.playerRect().intersects(enemy.getBoundingBox())) {
+                    player.Hit(enemy);
+                }
+
+                // Remove enemy if its HP is 0 or less
+                if (enemy.getHp() <= 0 || player.playerRect().intersects(enemy.getBoundingBox())) {
+                    enemies.remove(enemy);  // Remove the enemy from the list
+                    break;  // Exit the loop as the list is modified during iteration
+                }
+            }
+
+
+            for (int i = 0; i < enemies.size(); i++) {
+                Enemy enemy = enemies.get(i);
+
+                // Check collisions with projectiles
+                for (int j = 0; j < projectiles.size(); j++) {
+                    PlayerProjectile p = projectiles.get(j);
+                    if (enemy.getBoundingBox().intersects(p.getBounds())) {
+                        enemy.decreaseHp(10); // or however much
+                        projectiles.remove(j);
+                        j--;
+                        break;
+                    }
+                }
+
+                // Remove dead enemies
+                if (enemy.getHp() <= 0) {
+                    enemies.remove(i);
+                    i--;
+                }
+            }
+
+
+            checkWaveCompletion();
+            if (player.isInvincible() && (System.currentTimeMillis() / 100) % 2 == 0) {
+                g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            }
+
+            if (player.isFlashing()) {
+                g.drawImage(player.getHitIFRAME(), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            } else {
+                // Draw the player as normal if not flashing
+                g.drawImage(player.getPlayerImage(isMoving(), isDiagonalU(), isDiagonalD(), isRight(), isLeft(), isUP(), isDown()), (int) player.getxCoord(), (int) player.getyCoord(), null);
+            }
+
+            if (player.isInvincible()) {
+                long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
+                if (elapsed >= player.getInvincibilityDuration()) {
+                    player.setInvincible(false);
+                    player.updateFlashing();  // Reset flashing when invincibility ends
+                }
+            }
+
+
+            // draw score
+            g.setFont(new Font("Courier New", Font.BOLD, 24));
+
+
+            // player moves left (A)
+            if (pressedKeys[65]) {
+                player.moveLeft();
+            }
+
+
+            // player moves right (D)
+            if (pressedKeys[68]) {
+                player.moveRight();
+            }
+
+
+            // player moves up (W)
+            if (pressedKeys[87]) {
+                player.moveUp();
+            }
+
+
+            // player moves down (S)
+            if (pressedKeys[83]) {
+                player.moveDown();
+            }
+
+            if (pressedKeys[32]) {
+                rolled = true;
+            }
+            // Update and draw projectiles
+            for (int i = 0; i < projectiles.size(); i++) {
+                PlayerProjectile p = projectiles.get(i);
+                p.update();
+                p.draw(g);
+                if (p.isOffScreen(getWidth(), getHeight())) {
+                    projectiles.remove(i);
+                    i--;
+                }
             }
         }
-
-
-        // draw score
-        g.setFont(new Font("Courier New", Font.BOLD, 24));
-
-
-        // player moves left (A)
-        if (pressedKeys[65]) {
-            player.moveLeft();
-        }
-
-
-        // player moves right (D)
-        if (pressedKeys[68]) {
-            player.moveRight();
-        }
-
-
-        // player moves up (W)
-        if (pressedKeys[87]) {
-            player.moveUp();
-        }
-
-
-        // player moves down (S)
-        if (pressedKeys[83]) {
-            player.moveDown();
-        }
-
-        if (pressedKeys[32]) {
-            rolled = true;
-        }
-        // Update and draw projectiles
-        for (int i = 0; i < projectiles.size(); i++) {
-            PlayerProjectile p = projectiles.get(i);
-            p.update();
-            p.draw(g);
-            if (p.isOffScreen(getWidth(), getHeight())) {
-                projectiles.remove(i);
-                i--;
-            }
+        if (player.getHP() <= 0) {
+            g.drawImage(Black, 0, 0, null);
+            g.setColor(Color.RED);
+            Font font = new Font("Arial", Font.BOLD, 30);
+            g.setFont(font);
+            g.drawString("YOU LOSE", 375, 200);
+            g.drawString("Wave Reached: " + wave, 350, 300);
         }
     }
 
@@ -335,33 +366,38 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     // ActionListener interface method
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (enemies != null) {
-            for (Enemy enemy : enemies) {
-                enemy.moveTowardsPlayer(player);
+        Object Sender = e.getSource();
+        if (begin) {
+            if (enemies != null) {
+                for (Enemy enemy : enemies) {
+                    enemy.moveTowardsPlayer(player);
 
-                if (enemy instanceof RangedEnemy ranged) {
-                    ranged.resetShotFlag();
-                    // Check only once per enemy per tick
-                    if (ranged.canShoot()) {
-                        enemyProjectiles.add(ranged.shootAt(player, "src\\EnemyBullet.png"));
+                    if (enemy instanceof RangedEnemy ranged) {
+                        ranged.resetShotFlag();
+                        // Check only once per enemy per tick
+                        if (ranged.canShoot()) {
+                            enemyProjectiles.add(ranged.shootAt(player, "src\\EnemyBullet.png"));
+                        }
                     }
                 }
-            }
 
-            // update enemy projectiles (same)
-            for (int i = 0; i < enemyProjectiles.size(); i++) {
-                EnemyProjectile ep = enemyProjectiles.get(i);
-                ep.update();
-                if (ep.isOffScreen(getWidth(), getHeight())) {
-                    enemyProjectiles.remove(i);
-                    i--;
-                } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
-                    player.Hit(null);
-                    enemyProjectiles.remove(i);
-                    i--;
+                // update enemy projectiles (same)
+                for (int i = 0; i < enemyProjectiles.size(); i++) {
+                    EnemyProjectile ep = enemyProjectiles.get(i);
+                    ep.update();
+                    if (ep.isOffScreen(getWidth(), getHeight())) {
+                        enemyProjectiles.remove(i);
+                        i--;
+                    } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
+                        player.Hit(null);
+                        enemyProjectiles.remove(i);
+                        i--;
+                    }
                 }
+                repaint();
             }
-            repaint();
+        } else if (Sender == Start) {
+            begin = true;
         }
     }
 

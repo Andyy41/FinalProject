@@ -360,7 +360,11 @@ public class Player {
         }
     }
 
-public double getRolltime(){
+    public int getHP() {
+        return HP;
+    }
+
+    public double getRolltime(){
         return rollStartTime;
 }
     // We use a "bounding Rectangle" for detecting collision
