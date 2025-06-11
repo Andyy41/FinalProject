@@ -205,7 +205,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         if (!begin) {
             g.drawImage(Black, 0, 0, null);
             Start.addActionListener(this);
-            Start.setLocation(0, 0);
+            Start.setLocation(425, 200);
         }
 
         // Draw player based on state
