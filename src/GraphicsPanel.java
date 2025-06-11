@@ -39,6 +39,9 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private String enemyBullet;
     private JButton Start;
     private boolean begin;
+    private boolean waveCleared = false;
+    private long waveClearTime = 0;
+    private final long WAVE_DELAY = 2000; // 2 second delay between waves
 
 
     public GraphicsPanel() {
@@ -346,22 +349,23 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     }
 
     private void checkWaveCompletion() {
-        // Check if all enemies are dead
-        boolean allEnemiesDead = true;
-        for (Enemy enemy : enemies) {
-            if (!enemy.isDead()) {
-                allEnemiesDead = false;
-                break;
-            }
+        if (!waveCleared && enemies.isEmpty()) {
+            waveCleared = true;
+            waveClearTime = System.currentTimeMillis();
         }
 
-        // If all enemies are dead, progress to the next wave
-        if (allEnemiesDead) {
-            wave++; // Increase wave
-            enemies.clear(); // Clear current enemies
-            spawnEnemies(wave); // Spawn new enemies for the next wave
+        if (waveCleared) {
+            long now = System.currentTimeMillis();
+            if (now - waveClearTime >= WAVE_DELAY) {
+                wave++; // Next wave
+                enemies.clear();
+                spawnPoints.clear(); // Reset spawn points to avoid proximity issues
+                spawnEnemies(wave);
+                waveCleared = false;
+            }
         }
     }
+
 
     // ActionListener interface method
     @Override
@@ -472,4 +476,5 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void mouseExited(MouseEvent e) { } // unimplemented
+
 }
