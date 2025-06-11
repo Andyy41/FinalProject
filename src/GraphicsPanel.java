@@ -76,53 +76,66 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         add(Start);
     }
 
-    // Spawning enemies outside the map based on wave number
     private void spawnEnemies(int wave) {
-        Random rand = new Random();
-        int numberOfEnemies = wave * 5; // Increase enemies by 5 each wave
+        // Common enemies: Increase by 2 more each wave (1, 3, 5, 7...)
+        int numberOfCommonEnemies = (wave * 2) - 1;  // Ensures 1, 3, 5, 7, etc.
 
-        for (int i = 0; i < numberOfEnemies; i++) {
-            int edge = rand.nextInt(4);
+        // Ranged enemies: Every 3 waves, spawn 2 more
+        int numberOfRangedEnemies = 0;
+        if (wave >= 3) {
+            numberOfRangedEnemies = 2 * (wave / 3);  // Every 3 waves, add 2 more ranged enemies
+        }
 
-            // Spawn at a random point on one of the edges
-            if (edge == 0) { // Top edge
-                x = rand.nextDouble() * getWidth();
-                y = -50; // Outside the top of the screen
-            } else if (edge == 1) { // Bottom edge
-                x = rand.nextDouble() * getWidth();
-                y = getHeight() + 50; // Outside the bottom of the screen
-            } else if (edge == 2) { // Left edge
-                x = -50; // Outside the left of the screen
-                y = rand.nextDouble() * getHeight();
-            } else { // Right edge
-                x = getWidth() + 50; // Outside the right of the screen
-                y = rand.nextDouble() * getHeight();
-            }
-            // Create a new Point to represent the spawn location
-            Point spawnPoint = new Point((int) x, (int) y);
+        // Spawn common enemies
+        for (int i = 0; i < numberOfCommonEnemies; i++) {
+            // Generate a random position for each common enemy
+            double x = getRandomX();
+            double y = getRandomY();
+            enemies.add(new CommonEnemy(100, 10, 2, 1.0, x, y, "src/Enemy.png")); // Spawn a common enemy
+        }
 
-            // Check if this spawn point is too close to any other spawned enemy
-            boolean tooClose = false;
-            for (Point p : spawnPoints) {
-                if (spawnPoint.distance(p) < 100) { // 100px threshold for distance
-                    tooClose = true;
-                    break;
-                }
-            }
-
-            // If not too close to any other spawn, add to spawnPoints list
-            if (!tooClose) {
-                spawnPoints.add(spawnPoint);
-                // Choose a random type of enemy (Common or Ranged)
-                if (rand.nextBoolean()) {
-                    enemies.add(new CommonEnemy(100, 10, 2, 0.5, spawnPoint.x, spawnPoint.y, "src/Enemy.png"));
-                } else {
-                    enemies.add(new RangedEnemy(70, 20, 1, 1.0, spawnPoint.x, spawnPoint.y, "src/RangedEnemy.png"));
-                }
-            }
+        // Spawn ranged enemies (starting from wave 3)
+        for (int i = 0; i < numberOfRangedEnemies; i++) {
+            // Generate a random position for each ranged enemy
+            double x = getRandomX();
+            double y = getRandomY();
+            enemies.add(new RangedEnemy(70, 20, 1, 1.0, x, y, "src/RangedEnemy.png"));
         }
     }
 
+    private double getRandomX() {
+        Random rand = new Random();
+        int edge = rand.nextInt(4);  // Randomly choose one of the four edges
+
+        switch (edge) {
+            case 0: // Top edge
+            case 1: // Bottom edge
+                return rand.nextDouble() * (988 - 50) + 25;  // Spawn between 25 and (width - 25)
+            case 2: // Left edge
+                return -25;  // Spawn exactly 25 units outside the left edge
+            case 3: // Right edge
+                return 988 + 25;  // Spawn exactly 25 units outside the right edge
+            default:
+                return 0;  // Default (should never hit this)
+        }
+    }
+
+    private double getRandomY() {
+        Random rand = new Random();
+        int edge = rand.nextInt(4);  // Randomly choose one of the four edges
+
+        switch (edge) {
+            case 0: // Top edge
+                return -25;  // Spawn exactly 25 units above the top edge
+            case 1: // Bottom edge
+                return 540 + 25;  // Spawn exactly 25 units below the bottom edge
+            case 2: // Left edge
+            case 3: // Right edge
+                return rand.nextDouble() * (540 - 50) + 25;  // Spawn between 25 and (height - 25)
+            default:
+                return 0;  // Default (should never hit this)
+        }
+    }
 
     // Check if the player is moving (by checking movement keys)
     private boolean isMoving() {
@@ -207,11 +220,11 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.setColor(Color.white);
             g.setFont(new Font("Arial", Font.ITALIC, 14));
             g.setColor(Color.red);
-            g.drawString("Roll CD: " + (cooldownRemaining / 1000.0) + "s", 50, 20);
-            g.drawString("HP:" + player.GetHP(), 50, 60);
+            g.drawString("Roll CD: " + (cooldownRemaining / 1000.0) + "s", 65, 30);
+            g.drawString("HP:" + player.GetHP(), 60, 50);
             g.setFont(new Font("Times New Roman", Font.BOLD, 22));
             g.setColor(Color.white);
-            g.drawString("Wave: " + wave, 50, 80);
+            g.drawString("Wave: " + wave, 70, 75);
             player.updateFlashing();
             if (player.isInvincible()) {
                 long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
@@ -370,40 +383,39 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     // ActionListener interface method
     @Override
     public void actionPerformed(ActionEvent e) {
-        Object Sender = e.getSource();
+        Object sender = e.getSource();
+
         if (begin) {
-            if (enemies != null) {
-                for (Enemy enemy : enemies) {
-                    enemy.moveTowardsPlayer(player);
-
-                    if (enemy instanceof RangedEnemy ranged) {
-                        ranged.resetShotFlag();
-                        // Check only once per enemy per tick
-                        if (ranged.canShoot()) {
-                            enemyProjectiles.add(ranged.shootAt(player, "src\\EnemyBullet.png"));
-                        }
+            for (Enemy enemy : enemies) {
+                enemy.moveTowardsPlayer(player);
+                if (enemy instanceof RangedEnemy ranged) {
+                    if (ranged.canShoot()) {
+                        // Shoot only once if cooldown is valid
+                        enemyProjectiles.add(ranged.shootAt(player, "src\\EnemyBullet.png"));
                     }
                 }
-
-                // update enemy projectiles (same)
-                for (int i = 0; i < enemyProjectiles.size(); i++) {
-                    EnemyProjectile ep = enemyProjectiles.get(i);
-                    ep.update();
-                    if (ep.isOffScreen(getWidth(), getHeight())) {
-                        enemyProjectiles.remove(i);
-                        i--;
-                    } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
-                        player.Hit(null);
-                        enemyProjectiles.remove(i);
-                        i--;
-                    }
-                }
-                repaint();
             }
-        } else if (Sender == Start) {
-            begin = true;
+
+            // Update enemy projectiles (same)
+            for (int i = 0; i < enemyProjectiles.size(); i++) {
+                EnemyProjectile ep = enemyProjectiles.get(i);
+                ep.update();
+                if (ep.isOffScreen(getWidth(), getHeight())) {
+                    enemyProjectiles.remove(i);
+                    i--;
+                } else if (player.playerRect().intersects(ep.getBounds()) && !player.isInvincible()) {
+                    player.Hit(null);  // Player gets hit by the projectile
+                    enemyProjectiles.remove(i);
+                    i--;
+                }
+            }
+
+            repaint();  // Ensure graphics are updated
+        } else if (sender == Start) {
+            begin = true;  // Start the game when the button is clicked
         }
     }
+
 
 
 

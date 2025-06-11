@@ -293,7 +293,7 @@ public class Player {
     }
 
     public void moveDown() {
-        if (yCoord + MOVE_AMT <= 435) {
+        if (yCoord + MOVE_AMT <= 510) {
             yCoord += MOVE_AMT;
         }
     }
@@ -346,7 +346,6 @@ public class Player {
     }
     public void update() {
         if (isRolling) {
-            invincible = true;
             long elapsed = System.currentTimeMillis() - rollStartTime;
             if (elapsed >= RollDuration) {
                 isRolling = false;
@@ -355,7 +354,7 @@ public class Player {
             } else {
                 // Move once per frame
                 xCoord = Math.max(0, Math.min(920, xCoord + rollDx));
-                yCoord = Math.max(0, Math.min(435, yCoord + rollDy));
+                yCoord = Math.max(0, Math.min(510, yCoord + rollDy));
             }
         }
     }

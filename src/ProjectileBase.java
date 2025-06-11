@@ -40,7 +40,7 @@ public Rectangle getBounds() {
 }
 
 public boolean isOffScreen(int width, int height) {
-    return x < 0 || y < 0 || x > width || y > height;
+    return x < 0 || y < 0 || x > 988 || y > 540;
 }
 
 public double getX() { return x; }

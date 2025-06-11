@@ -36,15 +36,19 @@ public class RangedEnemy extends Enemy {
 
     public boolean canShoot() {
         long currentTime = System.currentTimeMillis();
+
+        // Check if the cooldown has passed and the enemy hasn't shot this tick yet
         if (currentTime - lastShotTime >= shootCooldown) {
-            lastShotTime = currentTime;
-            // Randomize next cooldown
-            shootCooldown = 2000 + new Random().nextInt(51); // 250–500 ms
-            System.out.println("Enemy at (" + xCoord + ", " + yCoord + ") fired a bullet!");
+            lastShotTime = currentTime; // Update last shot time
+            shootCooldown = 2000 ; // Random cooldown between 2000-2500 ms
+            hasShotThisTick = false; // Reset shot flag
             return true;
         }
+
         return false;
     }
+
+
 
     public void resetShotFlag() {
         hasShotThisTick = false;

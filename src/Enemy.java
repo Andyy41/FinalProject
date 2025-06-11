@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public abstract class Enemy {
     int hp;
@@ -17,15 +18,15 @@ public abstract class Enemy {
     BufferedImage aliveSprite;
     BufferedImage deadSprite;
 
-
-    public Enemy(int hp, int dmg, double speed, double dmgD, double spawnx, double spawny, String aliveImagePath) {
+    // Constructor for the enemy
+    public Enemy(int hp, int dmg, double speed, double dmgD, double xCoord, double yCoord, String aliveImagePath) {
         this.hp = hp;
         this.dmg = dmg;
         this.speed = speed;
         this.dmgD = dmgD;
         this.alive = true;
-        this.spawnx = spawnx;
-        this.spawny = spawny;
+        this.xCoord = xCoord; // Set the x-coordinate when the enemy is created
+        this.yCoord = yCoord; // Set the y-coordinate when the enemy is created
 
         try {
             aliveSprite = ImageIO.read(new File(aliveImagePath));
@@ -33,6 +34,9 @@ public abstract class Enemy {
             System.out.println("Failed to load alive sprite: " + e.getMessage());
         }
     }
+
+    // Abstract method to be implemented by subclasses for movement behavior
+    public abstract void moveTowardsPlayer(Player player);
 
     public void decreaseHp(int dec) {
         hp -= dec;
@@ -57,13 +61,9 @@ public abstract class Enemy {
     public int getDmg() { return dmg; }
     public double getSpeed() { return speed; }
     public double getDmgD() { return dmgD; }
-    public double getSpawnx(){return spawnx;}
-    public double getSpawny(){return spawny;}
-
+    public double getSpawnx(){ return spawnx; }
+    public double getSpawny(){ return spawny; }
 
     public void setX(double x) { xCoord = x; }
     public void setY(double y) { yCoord = y; }
-
-    // Override moveTowardsPlayer for basic movement
-    public abstract void moveTowardsPlayer(Player player);
 }
