@@ -1,11 +1,17 @@
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
 import javax.swing.JButton;
@@ -41,10 +47,13 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
     private boolean begin;
     private boolean waveCleared = false;
     private long waveClearTime = 0;
-    private final long WAVE_DELAY = 2000; // 2 second delay between waves
+    private final long WAVE_DELAY = 2000; // 2-second delay between waves
+    private MusicPlayer musicPlayer;
 
 
     public GraphicsPanel() {
+        // Initialize your music player and load the music file
+        musicPlayer = new MusicPlayer("src/Music.wav");
         try {
             background = ImageIO.read(new File("src/Room.png"));
         } catch (IOException e) {
@@ -60,6 +69,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+
+
         Start = new JButton("Play");
         player = new Player();
         enemies = new ArrayList<>();
@@ -206,6 +217,8 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.drawImage(Black, 0, 0, null);
             Start.addActionListener(this);
             Start.setLocation(425, 200);
+        } else{
+           musicPlayer.playMusic();
         }
 
         // Draw player based on state
@@ -226,6 +239,14 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             g.setColor(Color.white);
             g.drawString("Wave: " + wave, 70, 75);
             player.updateFlashing();
+            Iterator<Enemy> iterator = enemies.iterator();
+            while (iterator.hasNext()) {
+                Enemy enemy = iterator.next();
+                if (enemy.getHp() <= 0) {
+                    iterator.remove();  // Safe removal
+                }
+            }
+
             if (player.isInvincible()) {
                 long elapsed = System.currentTimeMillis() - player.getInvincibleStartTime();
                 if (elapsed >= player.getInvincibilityDuration()) {
@@ -382,9 +403,12 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     // ActionListener interface method
     @Override
-    public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
         Object sender = e.getSource();
-
+        if (sender == Start) {
+            begin = true;  // Start the game when the button is clicked
+            musicPlayer.playMusic(); // Start playing music immediately when the game begins
+        }
         if (begin) {
             for (Enemy enemy : enemies) {
                 enemy.moveTowardsPlayer(player);
@@ -411,8 +435,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             }
 
             repaint();  // Ensure graphics are updated
-        } else if (sender == Start) {
-            begin = true;  // Start the game when the button is clicked
         }
     }
 
@@ -488,5 +510,6 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void mouseExited(MouseEvent e) { } // unimplemented
+
 
 }

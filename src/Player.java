@@ -345,6 +345,7 @@ public class Player {
         rollDy = dy;
     }
     public void update() {
+
         if (isRolling) {
             long elapsed = System.currentTimeMillis() - rollStartTime;
             if (elapsed >= RollDuration) {
