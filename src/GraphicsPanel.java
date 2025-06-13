@@ -102,7 +102,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             // Generate a random position for each common enemy
             double x = getRandomX();
             double y = getRandomY();
-            enemies.add(new CommonEnemy(100, 10, 2, 1.0, x, y, "src/Enemy.png")); // Spawn a common enemy
+            enemies.add(new CommonEnemy(70, 5, 2, 1.0, x, y, "src/Enemy.png")); // Spawn a common enemy
         }
 
         // Spawn ranged enemies (starting from wave 3)
@@ -110,7 +110,7 @@ public class GraphicsPanel extends JPanel implements ActionListener, KeyListener
             // Generate a random position for each ranged enemy
             double x = getRandomX();
             double y = getRandomY();
-            enemies.add(new RangedEnemy(70, 20, 1, 1.0, x, y, "src/RangedEnemy.png"));
+            enemies.add(new RangedEnemy(50, 10, 1, 1.0, x, y, "src/RangedEnemy.png"));
         }
     }
 
